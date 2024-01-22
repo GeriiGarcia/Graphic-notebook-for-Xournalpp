@@ -59,6 +59,7 @@
   "C_Cpp.intelliSenseEngineFallback": "enabled",
   "files.associations": {
     "*.embeddedhtml": "html",
-    "gtk.h": "c"
+    "gtk.h": "c",
+    "dirent.h": "c"
   }
 }
