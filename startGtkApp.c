@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <dirent.h> 
 
-char cwd[1024] = "";
+char cwd[1024] = "/home/gerard/Gerard/UNI/Apuntes";
 
 typedef struct {
     int some_value;
@@ -109,6 +109,8 @@ gtk_label_set_markup(GTK_LABEL(view),result);
 
 int main( int argc, char **argv){
     GtkApplication *app;
+
+    chdir(cwd);
 
     getcwd(cwd, sizeof(cwd));
 
