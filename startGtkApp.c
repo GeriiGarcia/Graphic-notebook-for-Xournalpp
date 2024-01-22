@@ -8,6 +8,7 @@ typedef struct {
     GtkWidget *button;
 } UserData;
 
+void create_menu(GtkWidget *, GtkWidget *);
 
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
@@ -53,17 +54,23 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 }
 
 static void activate (GtkApplication *app, gpointer user_data){
+    
     GtkWidget *window;
     GtkWidget *button1;
     GtkWidget *main;
 
-GtkWidget *view;
-GtkTextBuffer *buffer;
+    char result[100] = "<big><b> ";
+    strcat(result, cwd);
+    strcat(result, " </b></big>");
 
-view = gtk_text_view_new ();
-gtk_text_view_set_editable(GTK_TEXT_VIEW(view), FALSE);
-buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (view));
-gtk_text_buffer_set_text (buffer, cwd, -1);
+    GtkWidget *view;
+
+view = gtk_label_new(cwd);
+
+
+
+gtk_label_set_markup(GTK_LABEL(view),result);
+
 
 
     window = gtk_application_window_new(app); //decimos que window sera una ventana de aplicacion
@@ -77,6 +84,8 @@ gtk_text_buffer_set_text (buffer, cwd, -1);
 
 
     button1 = gtk_button_new_with_label("button1"); //creamos el boton 1
+
+    create_menu(main, window);
 
     //Declaramos UserData y decimos que cuando se haga click en el boton 1 se ejecute la funcion on_button_clicked
     UserData *userdata = g_new(UserData, 1);
