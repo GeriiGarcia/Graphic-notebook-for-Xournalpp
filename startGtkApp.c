@@ -5,10 +5,12 @@ char cwd[1024] = "/home/gerard/Gerard/UNI/Apuntes";
 
 typedef struct {
     int some_value;
-    GtkWidget *button;
+    GtkWidget *box;
 } UserData;
 
 void create_menu(GtkWidget *, GtkWidget *);
+
+
 
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
@@ -36,11 +38,11 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             if( strcmp(dir->d_name,".") && strcmp(dir->d_name,"..")) // he de posar mes excepcions
             {
                 GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
-                gtk_container_add(GTK_CONTAINER(button_data->button), normalButton);
+                gtk_container_add(GTK_CONTAINER(button_data->box), normalButton);
 
                 UserData *userdata = g_new(UserData, 1);
                 button_data->some_value = 42;
-                userdata->button = button_data->button;
+                userdata->box = button_data->box;
                 g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
             }
             
@@ -49,7 +51,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     }
     
     // recarrega la vista
-    gtk_widget_show_all(button_data->button);
+    gtk_widget_show_all(button_data->box);
 
 }
 
@@ -65,11 +67,9 @@ static void activate (GtkApplication *app, gpointer user_data){
 
     GtkWidget *view;
 
-view = gtk_label_new(cwd);
+    view = gtk_label_new(cwd);
 
-
-
-gtk_label_set_markup(GTK_LABEL(view),result);
+    gtk_label_set_markup(GTK_LABEL(view),result);
 
 
 
@@ -90,7 +90,7 @@ gtk_label_set_markup(GTK_LABEL(view),result);
     //Declaramos UserData y decimos que cuando se haga click en el boton 1 se ejecute la funcion on_button_clicked
     UserData *userdata = g_new(UserData, 1);
     userdata->some_value = 42;
-    userdata->button = main;
+    userdata->box = main;
     g_signal_connect(button1, "clicked", G_CALLBACK(on_button_clicked), userdata);
     
 
