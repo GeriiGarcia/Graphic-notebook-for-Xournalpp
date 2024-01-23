@@ -105,7 +105,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         strcat(comando, cwd);
         strcat(comando, "/");
         strcat(comando, gtk_button_get_label(GTK_BUTTON(widget)));
-        system(strcat(xournal, agregarBarras(comando))); 
+        strcat(xournal, agregarBarras(comando));
+        system(strcat(xournal, " &")); //para que se vaya al background
     }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori)
     {
