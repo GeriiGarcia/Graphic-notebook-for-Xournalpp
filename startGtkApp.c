@@ -86,6 +86,20 @@ char* agregarBarras(char *cadena) {
     return nuevaCadena;
 }
 
+void abrirXournal()
+{
+    system("xournalpp &");
+}
+
+void afegirPredeterminat(GtkWidget *main_box)
+{
+    GtkWidget *normalButton = gtk_button_new_with_label("+");
+    gtk_container_add(GTK_CONTAINER(main_box), normalButton);
+    
+    g_signal_connect(normalButton, "clicked", G_CALLBACK(abrirXournal), NULL);
+
+    gtk_widget_show_all(main_box);
+}
 
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
@@ -122,6 +136,25 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 printf("%s\n",cwd);
             }
 
+            //agafo el pare del widget i canvio el text del directori actual
+            GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+            GList *children, *iter;
+            children = gtk_container_get_children(GTK_CONTAINER(parent));
+            for(iter = children; iter != NULL; iter = g_list_next(iter))
+            {
+                if(GTK_IS_LABEL(iter->data))
+                {
+                    char result[1000] = "<big><b> ";
+                    strcat(result, cwd);
+                    strcat(result, " </b></big>");
+                    gtk_label_set_markup(GTK_LABEL(iter->data),result);
+                    break;
+                }
+            }
+                
+
+            g_list_free(children);
+
         }
 
 
@@ -133,7 +166,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
         g_list_free(children);
 
-
+        afegirPredeterminat(button_data->box);
 
         //Llistar directoris
         g_print("Listando Directorios\n");
@@ -164,9 +197,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             closedir(d);
         }
     }
-
-
-
 
     // recarrega la vista
     gtk_widget_show_all(button_data->box);
