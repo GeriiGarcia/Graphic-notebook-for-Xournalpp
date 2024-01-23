@@ -1,4 +1,6 @@
 #include <gtk/gtk.h>
+#include <string.h>
+#include <stdio.h>
 #include <dirent.h> 
 
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
@@ -9,6 +11,33 @@ typedef struct {
 } UserData;
 
 void create_menu(GtkWidget *, GtkWidget *);
+
+/***
+ * @brief funcion que elimina desde la última barra encontrada en esa cadena hasta el final
+ * 
+*/
+void quitarDesdeUltimaBarra(char *cadena) {
+    int longitud = strlen(cadena);
+
+    // Verificar si la cadena es vacía o tiene un solo carácter (no hay barras que quitar)
+    if (longitud <= 1) {
+        return;
+    }
+
+    // Empezar desde el último carácter
+    int i = longitud - 1;
+
+    // Buscar la última barra desde el final
+    while (i >= 0 && cadena[i] != '/') {
+        i--;
+    }
+
+    // Verificar si se encontró una barra
+    if (i >= 0 && cadena[i] == '/') {
+        // Eliminar la última barra
+        cadena[i] = '\0';
+    }
+}
 
 
 /**
@@ -21,16 +50,23 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
     UserData *button_data = (UserData *)data;
 
+    // si no he pulsat button1, cambiar de directori al que marqui cwd
     if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "button1"))
     {
-        strcat(cwd,"/");
-        chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
-        printf("%s\n",cwd);
+        if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
+            quitarDesdeUltimaBarra(cwd);
+        else
+        {
+            strcat(cwd,"/");
+            chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
+            printf("%s\n",cwd);
+        }
+        
     }
 
-   
+    
+    // borro tots els fills del box de fitxers
     GList *children, *iter;
-
     children = gtk_container_get_children(GTK_CONTAINER(button_data->box));
     for(iter = children; iter != NULL; iter = g_list_next(iter))
         gtk_widget_destroy(GTK_WIDGET(iter->data));
@@ -39,7 +75,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
     
     
-
+    //Llistar directoris
     g_print("Listando Directorios\n");
 
     DIR *d;
@@ -49,8 +85,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         while ((dir = readdir(d)) != NULL) {
             printf("%s\n", dir->d_name);
 
-            //if( strcmp(dir->d_name,".") && strcmp(dir->d_name,"..")) // he de posar mes excepcions
-            //{
+            if( strcmp(dir->d_name,".")) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+            {
                 GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
                 gtk_container_add(GTK_CONTAINER(button_data->box), normalButton);
 
@@ -58,12 +94,11 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 button_data->some_value = 42;
                 userdata->box = button_data->box;
                 g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
-            //}
+            }
             
         }
         closedir(d);
     }
-    
     
 
     // recarrega la vista
