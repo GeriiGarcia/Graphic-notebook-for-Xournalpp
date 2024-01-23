@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <dirent.h> 
 
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
@@ -23,7 +24,6 @@ void quitarDesdeUltimaBarra(char *cadena) {
     if (longitud <= 1) {
         return;
     }
-
     // Empezar desde el último carácter
     int i = longitud - 1;
 
@@ -31,12 +31,59 @@ void quitarDesdeUltimaBarra(char *cadena) {
     while (i >= 0 && cadena[i] != '/') {
         i--;
     }
-
     // Verificar si se encontró una barra
     if (i >= 0 && cadena[i] == '/') {
         // Eliminar la última barra
         cadena[i] = '\0';
     }
+}
+
+const char *obtenerExtension(const char *nombreArchivo) {
+    const char *punto = strrchr(nombreArchivo, '.');
+    // Verificar si se encontró un punto y si no es el último carácter
+    if (punto != NULL && punto != nombreArchivo + strlen(nombreArchivo) - 1) {
+        return punto;
+    } else {
+        // No se encontró extensión o el punto está al final
+        return "Sin extensión";
+    }
+}
+
+char* agregarBarras(char *cadena) {
+    int longitud = strlen(cadena);
+
+    // Contar la cantidad de espacios en la cadena
+    int contadorEspacios = 0;
+    for (int i = 0; i < longitud; i++) {
+        if (cadena[i] == ' ') {
+            contadorEspacios++;
+        }
+    }
+
+    // Calcular la nueva longitud de la cadena con barras adicionales
+    int nuevaLongitud = longitud + contadorEspacios;
+
+    // Crear un nuevo arreglo para almacenar la cadena modificada
+    char *nuevaCadena = (char *)malloc((nuevaLongitud + 1) * sizeof(char));
+
+    // Copiar la cadena original con barras adicionales en el nuevo arreglo
+    int indiceOriginal = 0;
+    int indiceNuevo = 0;
+
+    while (indiceOriginal < longitud) {
+        if (cadena[indiceOriginal] == ' ') {
+            nuevaCadena[indiceNuevo++] = '\\'; // Agregar barra invertida
+        }
+
+        nuevaCadena[indiceNuevo++] = cadena[indiceOriginal++];
+    }
+
+    // Agregar el carácter nulo al final de la nueva cadena
+    nuevaCadena[indiceNuevo] = '\0';
+
+    printf("%s\n",nuevaCadena);
+
+    return nuevaCadena;
 }
 
 
@@ -50,56 +97,75 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
     UserData *button_data = (UserData *)data;
 
-    // si no he pulsat button1, cambiar de directori al que marqui cwd
-    if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "button1"))
+    //obrir fitxer en el cas que sigui d'extensio .xopp
+    if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".xopp") || !strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".pdf"))
     {
-        if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
-            quitarDesdeUltimaBarra(cwd);
-        else
+        char comando[1024] = "";
+        char xournal[11] = "xournalpp "; 
+        strcat(comando, cwd);
+        strcat(comando, "/");
+        strcat(comando, gtk_button_get_label(GTK_BUTTON(widget)));
+        system(strcat(xournal, agregarBarras(comando))); 
+    }
+    else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori)
+    {
+        // si no he pulsat button1, cambiar de directori al que marqui cwd
+        if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "button1"))
         {
-            strcat(cwd,"/");
-            chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
-            printf("%s\n",cwd);
-        }
-        
-    }
-
-    
-    // borro tots els fills del box de fitxers
-    GList *children, *iter;
-    children = gtk_container_get_children(GTK_CONTAINER(button_data->box));
-    for(iter = children; iter != NULL; iter = g_list_next(iter))
-        gtk_widget_destroy(GTK_WIDGET(iter->data));
-    
-    g_list_free(children);
-
-    
-    
-    //Llistar directoris
-    g_print("Listando Directorios\n");
-
-    DIR *d;
-    struct dirent *dir;
-    d = opendir(cwd);
-    if (d) {
-        while ((dir = readdir(d)) != NULL) {
-            printf("%s\n", dir->d_name);
-
-            if( strcmp(dir->d_name,".")) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+            if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
+                quitarDesdeUltimaBarra(cwd);
+            else
             {
-                GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
-                gtk_container_add(GTK_CONTAINER(button_data->box), normalButton);
-
-                UserData *userdata = g_new(UserData, 1);
-                button_data->some_value = 42;
-                userdata->box = button_data->box;
-                g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+                strcat(cwd,"/");
+                chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
+                printf("%s\n",cwd);
             }
-            
+
         }
-        closedir(d);
+
+
+        // borro tots els fills del box de fitxers
+        GList *children, *iter;
+        children = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+        for(iter = children; iter != NULL; iter = g_list_next(iter))
+            gtk_widget_destroy(GTK_WIDGET(iter->data));
+
+        g_list_free(children);
+
+
+
+        //Llistar directoris
+        g_print("Listando Directorios\n");
+
+        DIR *d;
+        struct dirent *dir;
+        d = opendir(cwd);
+        if (d) {
+            while ((dir = readdir(d)) != NULL) 
+            {
+                printf("%s\n", dir->d_name);
+
+                //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es mostraran
+                if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+                {
+                    
+                    GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
+                    gtk_container_add(GTK_CONTAINER(button_data->box), normalButton);
+                    
+                    UserData *userdata = g_new(UserData, 1);
+                    button_data->some_value = 42;
+                    userdata->box = button_data->box;
+                    g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+                    
+                }
+
+            }
+            closedir(d);
+        }
     }
-    
+
+
+
 
     // recarrega la vista
     gtk_widget_show_all(button_data->box);
