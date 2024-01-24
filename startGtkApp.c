@@ -174,7 +174,10 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         DIR *d;
         struct dirent *dir;
         d = opendir(cwd);
-        if (d) {
+        if (d) 
+        {
+            int i = 0;
+            int j = 0;
             while ((dir = readdir(d)) != NULL) 
             {
                 printf("%s\n", dir->d_name);
@@ -182,15 +185,27 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es mostraran
                 if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                 {
-                    
+                    //posar widgets al box   
                     GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
-                    gtk_container_add(GTK_CONTAINER(button_data->box), normalButton);
+                    gtk_widget_set_margin_start(normalButton, 5);
+                    gtk_widget_set_margin_end(normalButton, 5);
+                    gtk_widget_set_margin_top(normalButton, 5);
+                    gtk_widget_set_margin_bottom(normalButton, 5);
+
+                    gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
                     
                     UserData *userdata = g_new(UserData, 1);
                     button_data->some_value = 42;
                     userdata->box = button_data->box;
                     g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
-                    
+
+                    if(i == 2 ){
+                        i = 0;
+                        j += 1;
+                    }
+                    else
+                        i += 1;
+
                 }
 
             }
@@ -218,24 +233,34 @@ static void activate (GtkApplication *app, gpointer user_data){
 
     view = gtk_label_new(cwd);
     gtk_label_set_markup(GTK_LABEL(view),result);
+    gtk_label_set_xalign(GTK_LABEL(view), 0.0); // Alineación a la izquierda
+    gtk_label_set_yalign(GTK_LABEL(view), 0.0); // Alineación en la parte superior
+    
 
 
     window = gtk_application_window_new(app); //decimos que window sera una ventana de aplicacion
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit),NULL);
     gtk_window_set_title(GTK_WINDOW(window), "LlunaLaMejor&HarryStyles<3");
-    gtk_window_set_default_size(GTK_WINDOW(window), 700, 500);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 
     //creamos y metemos en window el contenedor main
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
-    files = gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
+    files = gtk_grid_new();
+    
     gtk_container_add(GTK_CONTAINER(window), main);
     
 
     //gtk_box_pack_start(GTK_BOX(window),main,TRUE,TRUE, 50);
-    gtk_box_pack_end(GTK_BOX(main),files, TRUE, TRUE, 50);
+    gtk_box_pack_end(GTK_BOX(main), files, TRUE, TRUE, 10);
+
+
+    gtk_widget_set_halign(files, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(files, GTK_ALIGN_FILL);
+
 
     //la primera pantalla la deixare per si vull posar més d'una opcio quan s'inicii l'aplicacio, com opcions de configuracio o algo aixi.
     button1 = gtk_button_new_with_label("button1"); //creamos el boton 1
+    gtk_grid_attach(GTK_GRID(files), button1, 0, 0, 50, 50);
 
     create_menu(main, window);
 
@@ -246,9 +271,8 @@ static void activate (GtkApplication *app, gpointer user_data){
     g_signal_connect(button1, "clicked", G_CALLBACK(on_button_clicked), userdata);
     
 
-    gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 50);
-    gtk_box_pack_end(GTK_BOX(files), button1, TRUE, TRUE, 50);
-
+    gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
+    //gtk_box_pack_end(GTK_BOX(files), button1, TRUE, TRUE, 10);
  
     gtk_widget_show_all(window);
 
