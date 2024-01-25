@@ -8,6 +8,7 @@
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/";
 gchar *nombre = "pdf";
+char *border_class = "border";
 #define ANCHO_PREV (59.5+80)
 #define ALTURA_PREV (84.1+80)
 #define MARGIN 10
@@ -102,32 +103,14 @@ void abrirXournal()
     system("xournalpp &");
 }
 
-char      *application_box_class    = "application_box";
-int        application_box_padding  = 8;
-char      *application_id           = "com.petermoulding.gtk_box_borders";
-char      *application_name         = "Gtk box borders";
-int        application_height       = 600;
-int        application_width        = 600;
-char      *border_class             = "border";
+
+
 
 char *css =
-    ".application_box { background-color: #00ffff; }\n"
     ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
     ".border_solid    { border-style: solid; }\n"
     ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; }\n"
     ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n"
-    ".border_padded   { padding: 10px; }\n"
-    ".border_both     { margin: 10px; padding: 10px; }\n"
-    ".border_color    { background-color: white; border-color: lime; color: yellow; font-style: italic; }\n"
-    ".border_none     { border-style: none; }\n"
-    ".border_hidden   { border-style: hidden; }\n"
-    ".border_dashed   { border-style: dashed; }\n"
-    ".border_dotted   { border-style: dotted; }\n"
-    ".border_double   { border-style: double; }\n"
-    ".border_groove   { border-style: groove; }\n"
-    ".border_ridge    { border-style: ridge; }\n"
-    ".border_inset    { border-style: inset; }\n"
-    ".border_outset   { border-style: outset; }\n"
     ;
 
 void css_add(char *css)
@@ -145,15 +128,12 @@ void css_add(char *css)
 }
 
 
+/***
+ * @brief sirve para añadir un pdf o xopp a la grid, teniendo en cuenta que cada uno tiene un marco diferente
+*/
 void box_add(GtkWidget *parent_box, char *class, const char * auxPrev, gpointer data, char * d_name, int i, int j, int esPdf)
 {  
     // Crear el botón
-    //GtkWidget *normalButton = gtk_button_new_with_label("+");
-
-    /*gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
-    gtk_grid_attach(GTK_GRID(parent_box), normalButton, 0, 0, 1, 1);
-    g_signal_connect(normalButton, "clicked", G_CALLBACK(abrirXournal), NULL);
-    gtk_widget_show_all(parent_box);*/
 
     UserData *button_data = (UserData *)data;
 
@@ -395,22 +375,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                         css_add(css);
                         box_add(button_data->box, "border_margin_pdf", auxPrev, data, dir->d_name, i, j, 1);
 
-                        
-                        /*GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
-                        gtk_widget_set_margin_start(normalButton, MARGIN);
-                        gtk_widget_set_margin_end(normalButton, MARGIN);
-                        gtk_widget_set_margin_top(normalButton, MARGIN);
-                        gtk_widget_set_margin_bottom(normalButton, MARGIN);
-                        gtk_widget_set_name(normalButton, "pdf");
-
-                        //poner nombre abajo
-                        GtkWidget *label = gtk_label_new(NULL);
-                        gtk_label_set_markup(GTK_LABEL(label), dir->d_name);
-                        gtk_container_add(GTK_CONTAINER(normalButton), label);
-
-
-                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);*/
-
 
 
                     }
@@ -432,21 +396,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
                         css_add(css);
                         box_add(button_data->box, "border_margin", auxPrev, data, dir->d_name, i, j, 0);
-                        
-                        /*GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
-                        gtk_widget_set_margin_start(normalButton, MARGIN);
-                        gtk_widget_set_margin_end(normalButton, MARGIN);
-                        gtk_widget_set_margin_top(normalButton, MARGIN);
-                        gtk_widget_set_margin_bottom(normalButton, MARGIN);
-                        gtk_widget_set_name(normalButton, "xournal");
-
-                        //poner nombre abajo
-                        GtkWidget *label = gtk_label_new(NULL);
-                        gtk_label_set_markup(GTK_LABEL(label), dir->d_name);
-                        gtk_container_add(GTK_CONTAINER(normalButton), label);
-
-
-                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);*/
 
 
                     }
