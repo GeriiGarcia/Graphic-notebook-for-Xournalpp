@@ -23,6 +23,7 @@ void on_button_clicked(GtkWidget *, gpointer );
 void base64_to_image(const char *, const char *);
 xmlChar* copiar_y_extraer_preview(const char *, const char *);
 void addWhiteBackground(const char *, const char *);
+GtkWidget *create_file_button(const char *, gpointer , char *);
 
 /***
  * @brief funcion que elimina desde la última barra encontrada en esa cadena hasta el final
@@ -102,6 +103,83 @@ void abrirXournal()
     system("xournalpp &");
 }
 
+char      *application_box_class    = "application_box";
+int        application_box_padding  = 8;
+char      *application_id           = "com.petermoulding.gtk_box_borders";
+char      *application_name         = "Gtk box borders";
+int        application_height       = 600;
+int        application_width        = 600;
+char      *border_class             = "border";
+
+char *css =
+    ".application_box { background-color: #00ffff; }\n"
+    ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
+    ".border_solid    { border-style: solid; }\n"
+    ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; }\n"
+    ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n"
+    ".border_padded   { padding: 10px; }\n"
+    ".border_both     { margin: 10px; padding: 10px; }\n"
+    ".border_color    { background-color: white; border-color: lime; color: yellow; font-style: italic; }\n"
+    ".border_none     { border-style: none; }\n"
+    ".border_hidden   { border-style: hidden; }\n"
+    ".border_dashed   { border-style: dashed; }\n"
+    ".border_dotted   { border-style: dotted; }\n"
+    ".border_double   { border-style: double; }\n"
+    ".border_groove   { border-style: groove; }\n"
+    ".border_ridge    { border-style: ridge; }\n"
+    ".border_inset    { border-style: inset; }\n"
+    ".border_outset   { border-style: outset; }\n"
+    ;
+
+void css_add(char *css)
+{
+    /* CSS */
+    GError *error = NULL;
+    GtkStyleContext *context;
+    GtkCssProvider *provider = gtk_css_provider_new ();
+    gtk_css_provider_load_from_data (provider, css, strlen (css), &error);
+    if (error != NULL)
+    {
+        fprintf (stderr, "CSS: %s\n", error->message);
+    }
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+}
+
+
+void box_add(GtkWidget *parent_box, char *class, const char * auxPrev, gpointer data, char * d_name, int i, int j, int esPdf)
+{  
+    // Crear el botón
+    //GtkWidget *normalButton = gtk_button_new_with_label("+");
+
+    /*gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
+    gtk_grid_attach(GTK_GRID(parent_box), normalButton, 0, 0, 1, 1);
+    g_signal_connect(normalButton, "clicked", G_CALLBACK(abrirXournal), NULL);
+    gtk_widget_show_all(parent_box);*/
+
+    UserData *button_data = (UserData *)data;
+
+    GtkWidget *normalButton = create_file_button(auxPrev, data, d_name);
+    gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), border_class);
+    gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), class);
+
+    gtk_widget_set_margin_start(normalButton, MARGIN);
+    gtk_widget_set_margin_end(normalButton, MARGIN);
+    gtk_widget_set_margin_top(normalButton, MARGIN);
+    gtk_widget_set_margin_bottom(normalButton, MARGIN);
+
+    if(esPdf == 0)
+        gtk_widget_set_name(normalButton, "xournal");
+    else
+        gtk_widget_set_name(normalButton, "pdf");
+
+    //poner nombre abajo
+    GtkWidget *label = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label), d_name);
+    gtk_container_add(GTK_CONTAINER(normalButton), label);
+    gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+    
+}
+
 void afegirPredeterminat(GtkWidget *main_box)
 {
     // Crear el botón
@@ -115,6 +193,7 @@ void afegirPredeterminat(GtkWidget *main_box)
 
     gtk_widget_show_all(main_box);
 }
+
 
 
 void on_button_hover(GtkWidget *widget, GdkEvent *event, gpointer data) {
@@ -196,18 +275,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         strcat(xournal, agregarBarras(comando));
         system(strcat(xournal, " &")); //para que se vaya al background
     }
-    //obrir fitxer en el cas que sigui d'extensio .xopp
-    else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".xopp") || !strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".pdf"))
-    {
-        
-        char comando[1024] = "";
-        char xournal[1024] = "xournalpp "; 
-        strcat(comando, cwd);
-        strcat(comando, "/");
-        strcat(comando, gtk_button_get_label(GTK_BUTTON(widget)));
-        strcat(xournal, agregarBarras(comando));
-        system(strcat(xournal, " &")); //para que se vaya al background
-    }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
     {
         
@@ -225,20 +292,35 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
             //agafo el pare del widget i canvio el text del directori actual
             GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+            parent = gtk_widget_get_parent(parent);
+            parent = gtk_widget_get_parent(parent);
+
             GList *children, *iter;
             children = gtk_container_get_children(GTK_CONTAINER(parent));
+            
             for(iter = children; iter != NULL; iter = g_list_next(iter))
             {
-                if(GTK_IS_LABEL(iter->data))
-                {
-                    char result[1000] = "<big><b> ";
-                    strcat(result, cwd);
-                    strcat(result, " </b></big>");
-                    gtk_label_set_markup(GTK_LABEL(iter->data),result);
+                
+                if(strcmp(gtk_widget_get_name((iter->data)), "fijo") == 0)
+                {   
+
+                    GList *children2, *iter2;
+                    children2 = gtk_container_get_children(GTK_CONTAINER(iter->data));
+
+                    for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+                    {
+                        if(GTK_IS_LABEL(iter2->data))
+                        {   
+                            char result[1000] = "<big><b> ";
+                            strcat(result, cwd);
+                            strcat(result, " </b></big>");
+                            gtk_label_set_markup(GTK_LABEL(iter2->data),result);
+                            break;
+                        }
+                    }
                     break;
                 }
             }
-                
 
             g_list_free(children);
 
@@ -269,7 +351,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             {
                 printf("%s\n", dir->d_name);
 
-                //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es mostraran
+                //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
                 if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                 {
                     if(!strcmp(obtenerExtension(dir->d_name), "Sin extensión")) // si es un directorio
@@ -311,8 +393,11 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
                         pdf_to_image(auxPdf, auxPrev);
 
+                        css_add(css);
+                        box_add(button_data->box, "border_margin_pdf", auxPrev, data, dir->d_name, i, j, 1);
+
                         
-                        GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
+                        /*GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
                         gtk_widget_set_margin_start(normalButton, MARGIN);
                         gtk_widget_set_margin_end(normalButton, MARGIN);
                         gtk_widget_set_margin_top(normalButton, MARGIN);
@@ -325,7 +410,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                         gtk_container_add(GTK_CONTAINER(normalButton), label);
 
 
-                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);*/
 
 
 
@@ -346,8 +431,11 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
                         base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
                         //addWhiteBackground(auxPrev, auxPrev);
+
+                        css_add(css);
+                        box_add(button_data->box, "border_margin", auxPrev, data, dir->d_name, i, j, 0);
                         
-                        GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
+                        /*GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
                         gtk_widget_set_margin_start(normalButton, MARGIN);
                         gtk_widget_set_margin_end(normalButton, MARGIN);
                         gtk_widget_set_margin_top(normalButton, MARGIN);
@@ -360,7 +448,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                         gtk_container_add(GTK_CONTAINER(normalButton), label);
 
 
-                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);*/
 
 
                     }
@@ -401,6 +489,7 @@ static void activate (GtkApplication *app, gpointer user_data){
 
 
     GtkWidget *container = gtk_fixed_new();
+    gtk_widget_set_name(container, "fijo");
    
 
     GtkWidget *view;
@@ -417,7 +506,7 @@ static void activate (GtkApplication *app, gpointer user_data){
     window = gtk_application_window_new(app); //decimos que window sera una ventana de aplicacion
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit),NULL);
     gtk_window_set_title(GTK_WINDOW(window), "Libreta Para Xournalpp");
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
 
     //creamos y metemos en window el contenedor main
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
@@ -436,7 +525,7 @@ static void activate (GtkApplication *app, gpointer user_data){
 
 
     gtk_widget_set_halign(files, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(files, GTK_ALIGN_FILL);
+    gtk_widget_set_valign(files, GTK_ALIGN_CENTER);
 
 
 
