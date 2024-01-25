@@ -22,7 +22,6 @@ void pdf_to_image(const char *, const char *);
 void on_button_clicked(GtkWidget *, gpointer );
 void base64_to_image(const char *, const char *);
 xmlChar* copiar_y_extraer_preview(const char *, const char *);
-void addWhiteBackground(const char *, const char *);
 GtkWidget *create_file_button(const char *, gpointer , char *);
 
 /***
@@ -430,7 +429,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                         strcat(auxPrev, ".png");
 
                         base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
-                        //addWhiteBackground(auxPrev, auxPrev);
 
                         css_add(css);
                         box_add(button_data->box, "border_margin", auxPrev, data, dir->d_name, i, j, 0);

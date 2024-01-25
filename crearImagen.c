@@ -125,39 +125,3 @@ xmlChar* copiar_y_extraer_preview(const char *ruta_origen, const char *ruta_dest
 
 
 
-void addWhiteBackground(const char *inputImagePath, const char *outputImagePath) {
-    // Inicializar FreeImage
-    FreeImage_Initialise(0);
-
-    // Cargar la imagen de entrada
-    FIBITMAP *inputImage = FreeImage_Load(FIF_PNG, inputImagePath, PNG_DEFAULT);
-
-    if (inputImage == NULL) {
-        fprintf(stderr, "Error al cargar la imagen de entrada.\n");
-        FreeImage_DeInitialise();
-        return;
-    }
-
-    // Convertir la imagen de entrada a 24 bits por píxel
-    FIBITMAP *convertedInputImage = FreeImage_ConvertTo24Bits(inputImage);
-    FreeImage_Unload(inputImage);  // Liberar la imagen original
-
-    // Obtener las dimensiones de la imagen
-    int width = FreeImage_GetWidth(convertedInputImage);
-    int height = FreeImage_GetHeight(convertedInputImage);
-
-    // Crear una nueva imagen con fondo blanco
-    FIBITMAP *outputImage = FreeImage_Allocate(width, height, 24, 255, 255, 255);
-
-    // Copiar la imagen original sobre el fondo blanco
-    FreeImage_Paste(outputImage, convertedInputImage, 0, 0, 255);
-
-    // Guardar la imagen resultante
-    FreeImage_Save(FIF_PNG, outputImage, outputImagePath, PNG_DEFAULT);
-
-    // Liberar recursos
-    FreeImage_Unload(convertedInputImage);
-    FreeImage_Unload(outputImage);
-    FreeImage_DeInitialise();
-}
-
