@@ -18,6 +18,13 @@ typedef struct {
     GtkWidget *box;
 } UserData;
 
+char *css =
+    ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
+    ".border_solid    { border-style: solid; }\n"
+    ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; }\n"
+    ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
+
+
 void create_menu(GtkWidget *, GtkWidget *);
 void pdf_to_image(const char *, const char *);
 void on_button_clicked(GtkWidget *, gpointer );
@@ -103,14 +110,6 @@ void abrirXournal()
     system("xournalpp &");
 }
 
-
-
-
-char *css =
-    ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
-    ".border_solid    { border-style: solid; }\n"
-    ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; }\n"
-    ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
 
 void css_add(char *css)
 {
@@ -223,6 +222,42 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name)
     return box;
 }
 
+
+int compararArchivos(const void *a, const void *b) {
+    const char *nombreA = *(const char **)a;
+    const char *nombreB = *(const char **)b;
+
+    // Obtener extensiones
+    const char *extensionA = obtenerExtension(nombreA);
+    const char *extensionB = obtenerExtension(nombreB);
+
+    // Comparar directorios primero
+    if (!strcmp(extensionA, "Sin extensión") && strcmp(extensionB, "Sin extensión")) {
+        return -1;
+    } else if (strcmp(extensionA, "Sin extensión") && !strcmp(extensionB, "Sin extensión")) {
+        return 1;
+    }
+    
+    // Comparar extensiones .xopp primero
+    if (strcmp(extensionA, ".xopp") == 0 && strcmp(extensionB, ".xopp") != 0) {
+        return -1;
+    } else if (strcmp(extensionA, ".xopp") != 0 && strcmp(extensionB, ".xopp") == 0) {
+        return 1;
+    }
+
+    // Comparar extensiones .pdf
+    int comparacion = strcmp(extensionA, extensionB);
+    if (comparacion != 0) {
+        return comparacion;
+    }
+
+    // Comparar nombres
+    
+    return strcmp(nombreA, nombreB);
+}
+
+
+
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
  * 
@@ -304,18 +339,25 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
         g_list_free(children);
 
-        afegirPredeterminat(button_data->box);
+        
 
         //Llistar directoris
         g_print("Listando Directorios\n");
+
+        char *archivosDirectorios[1024];
+
+        for (int i = 0; i < 1024; i++) {
+            archivosDirectorios[i] = NULL;
+        }
+
+        int n = 0;
 
         DIR *d;
         struct dirent *dir;
         d = opendir(cwd);
         if (d) 
         {
-            int i = 1;
-            int j = 0;
+            
             while ((dir = readdir(d)) != NULL) 
             {
                 printf("%s\n", dir->d_name);
@@ -323,81 +365,13 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
                 if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                 {
-                    if(!strcmp(obtenerExtension(dir->d_name), "Sin extensión")) // si es un directorio
-                    {
-                        //posar widgets al box   
-                        GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
-                        gtk_widget_set_margin_start(normalButton, MARGIN);
-                        gtk_widget_set_margin_end(normalButton, MARGIN);
-                        gtk_widget_set_margin_top(normalButton, MARGIN);
-                        gtk_widget_set_margin_bottom(normalButton, MARGIN);
-
-                        gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
-
-                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
-
-
-
-                        UserData *userdata = g_new(UserData, 1);
-                        strncpy(button_data->some_value, dir->d_name, sizeof(button_data->some_value) - 1);
-                        button_data->some_value[sizeof(button_data->some_value) - 1] = '\0';
-
-                        
-                        
-                        userdata->box = button_data->box;
-                        g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
-                    }
-                    else if(!strcmp(obtenerExtension(dir->d_name), ".pdf")) // si es pdf
-                    {
-                        char auxPdf[1024] = "";
-                        char auxPrev[1024] = "";
-
-                        strcat(auxPdf, cwd);
-                        strcat(auxPdf, "/");
-                        strcat(auxPdf, dir->d_name);
-
-                        strcat(auxPrev, guardarPrevisualizaciones);
-                        strcat(auxPrev, dir->d_name);
-                        strcat(auxPrev, ".png");
-
-                        pdf_to_image(auxPdf, auxPrev);
-
-                        css_add(css);
-                        box_add(button_data->box, "border_margin_pdf", auxPrev, data, dir->d_name, i, j, 1);
-
-
-
-                    }
-                    else // si es xopp
-                    {
-
-                        char auxXopp[1024] = "";
-                        char auxPrev[1024] = "";
-
-                        strcat(auxXopp, cwd);
-                        strcat(auxXopp, "/");
-                        strcat(auxXopp, dir->d_name);
-
-                        strcat(auxPrev, guardarPrevisualizaciones);
-                        strcat(auxPrev, dir->d_name);
-                        strcat(auxPrev, ".png");
-
-                        base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
-
-                        css_add(css);
-                        box_add(button_data->box, "border_margin", auxPrev, data, dir->d_name, i, j, 0);
-
-
-                    }
+                    
+                    archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
+                    archivosDirectorios[n][0] = '\0';
+                    strcat(archivosDirectorios[n], dir->d_name);
+                    n++;
 
                     
-                    //nombre de columnes q vull que tingui
-                    if(i == 3 ){
-                        i = 0;
-                        j += 1;
-                    }
-                    else
-                        i += 1;
 
                 }
 
@@ -406,6 +380,96 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             }
             closedir(d);
         }
+
+
+        //ordenar archivosDirectorios[n]   
+        qsort(archivosDirectorios, n, sizeof(char *), compararArchivos);
+
+        int i = 1;
+        int j = 0;
+        for (int k = 0; k < n; k++)
+        {
+            
+            if(!strcmp(obtenerExtension(archivosDirectorios[k]), "Sin extensión")) // si es un directorio
+            {
+                //posar widgets al box   
+                GtkWidget *normalButton = gtk_button_new_with_label(archivosDirectorios[k]);
+                gtk_widget_set_margin_start(normalButton, MARGIN);
+                gtk_widget_set_margin_end(normalButton, MARGIN);
+                gtk_widget_set_margin_top(normalButton, MARGIN);
+                gtk_widget_set_margin_bottom(normalButton, MARGIN);
+
+                gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
+
+                gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+
+                UserData *userdata = g_new(UserData, 1);
+                strncpy(button_data->some_value, archivosDirectorios[k], sizeof(button_data->some_value) - 1);
+                button_data->some_value[sizeof(button_data->some_value) - 1] = '\0';
+
+                userdata->box = button_data->box;
+                g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+            }
+            else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf")) // si es pdf
+            {
+                char auxPdf[1024] = "";
+                char auxPrev[1024] = "";
+
+                strcat(auxPdf, cwd);
+                strcat(auxPdf, "/");
+                strcat(auxPdf, archivosDirectorios[k]);
+
+                strcat(auxPrev, guardarPrevisualizaciones);
+                strcat(auxPrev, archivosDirectorios[k]);
+                strcat(auxPrev, ".png");
+
+                pdf_to_image(auxPdf, auxPrev);
+
+                css_add(css);
+                box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
+
+
+
+            }
+            else // si es xopp
+            {
+
+                char auxXopp[1024] = "";
+                char auxPrev[1024] = "";
+
+                strcat(auxXopp, cwd);
+                strcat(auxXopp, "/");
+                strcat(auxXopp, archivosDirectorios[k]);
+
+                strcat(auxPrev, guardarPrevisualizaciones);
+                strcat(auxPrev, archivosDirectorios[k]);
+                strcat(auxPrev, ".png");
+
+                base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
+
+                css_add(css);
+                box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
+
+
+            }
+
+                    
+            //nombre de columnes q vull que tingui
+            if(i == 3 ){
+                i = 0;
+                j += 1;
+            }
+            else
+                i += 1;
+        }
+
+        for (int i = 0; i < n; i++) {
+            free(archivosDirectorios[i]);
+        }
+
+        afegirPredeterminat(button_data->box);    
+
+
     }
 
     // recarrega la vista
