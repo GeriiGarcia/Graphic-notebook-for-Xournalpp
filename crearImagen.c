@@ -83,8 +83,6 @@ xmlChar* copiar_y_extraer_preview(const char *ruta_origen, const char *ruta_dest
     sprintf(comando, "cp %s %s.gz", ruta_origen, ruta_destino);
     system(comando);
 
-    printf("Copiando con el comando: %s\n", comando);
-
     // Descomprimir el fichero
     sprintf(comando, "gunzip %s.gz -f", ruta_destino);
     system(comando);

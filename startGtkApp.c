@@ -20,8 +20,7 @@ typedef struct {
 
 char *css =
     ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
-    ".border_solid    { border-style: solid; }\n"
-    ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; }\n"
+    ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; }\n"
     ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
 
 
@@ -128,6 +127,15 @@ void css_add(char *css)
 
 /***
  * @brief sirve para añadir un pdf o xopp a la grid, teniendo en cuenta que cada uno tiene un marco diferente
+ * 
+ * @param parent_box box al que añadir el widget
+ * @param class CSS class para añadir estilo
+ * @param auxPrev ruta de la que queremos listar la imagen
+ * @param data data que se pasa en la funcion on_button_clicked()
+ * @param d_name se usa para la etiqueta
+ * @param i columna 
+ * @param j fila
+ * @param esPdf 1 si es PDF. 0 si no es PDF
 */
 void box_add(GtkWidget *parent_box, char *class, const char * auxPrev, gpointer data, char * d_name, int i, int j, int esPdf)
 {  
@@ -218,7 +226,6 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name)
     g_signal_connect(button, "enter-notify-event", G_CALLBACK(on_button_hover), userdata);
     g_signal_connect(button, "leave-notify-event", G_CALLBACK(on_button_unhover), userdata);
 
-
     return box;
 }
 
@@ -265,7 +272,6 @@ int compararArchivos(const void *a, const void *b) {
     
     return strcmp(nombreA, nombreB);
 }
-
 
 
 /**
@@ -340,7 +346,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
         }
 
-
         // borro tots els fills del box de fitxers
         GList *children, *iter;
         children = gtk_container_get_children(GTK_CONTAINER(button_data->box));
@@ -348,8 +353,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             gtk_widget_destroy(GTK_WIDGET(iter->data));
 
         g_list_free(children);
-
-        
 
         //Llistar directoris
         g_print("Listando Directorios\n");
@@ -431,8 +434,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 css_add(css);
                 box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
 
-
-
             }
             else // si es xopp
             {
@@ -453,7 +454,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 css_add(css);
                 box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
 
-
             }
 
                     
@@ -466,12 +466,10 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 i += 1;
         }
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++) 
             free(archivosDirectorios[i]);
-        }
-
+        
         afegirPredeterminat(button_data->box);    
-
 
     }
 
@@ -495,7 +493,6 @@ static void activate (GtkApplication *app, gpointer user_data){
     GtkWidget *container = gtk_fixed_new();
     gtk_widget_set_name(container, "fijo");
    
-
     GtkWidget *view;
 
     view = gtk_label_new(cwd);
@@ -504,9 +501,6 @@ static void activate (GtkApplication *app, gpointer user_data){
     gtk_label_set_yalign(GTK_LABEL(view), 0.0); // Alineación en la parte superior
     gtk_widget_set_size_request(view, 300, 20);
     
-    
-
-
     window = gtk_application_window_new(app); //decimos que window sera una ventana de aplicacion
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit),NULL);
     gtk_window_set_title(GTK_WINDOW(window), "Libreta Para Xournalpp");
