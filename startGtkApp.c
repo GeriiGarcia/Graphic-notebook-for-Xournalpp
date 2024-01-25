@@ -110,8 +110,7 @@ char *css =
     ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
     ".border_solid    { border-style: solid; }\n"
     ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; }\n"
-    ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n"
-    ;
+    ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
 
 void css_add(char *css)
 {
@@ -234,17 +233,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
     UserData *button_data = (UserData *)data;
     
-    if(strcmp(gtk_widget_get_name(widget), nombre) == 0)
-    {
-        char comando[1024] = "";
-        char xournal[1024] = "xournalpp "; 
-        strcat(comando, cwd);
-        strcat(comando, "/");
-        strcat(comando, button_data->some_value);
-        strcat(xournal, agregarBarras(comando));
-        system(strcat(xournal, " &")); //para que se vaya al background
-    }
-    else if(strcmp(gtk_widget_get_name(widget), "xournal") == 0)
+    // en cas que haigi fet click a un .pdf o un .xopp, s'obrira el xournalpp
+    if(strcmp(gtk_widget_get_name(widget), nombre) == 0 || strcmp(gtk_widget_get_name(widget), "xournal") == 0)
     {
         char comando[1024] = "";
         char xournal[1024] = "xournalpp "; 
