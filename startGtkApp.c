@@ -237,6 +237,16 @@ int compararArchivos(const void *a, const void *b) {
     } else if (strcmp(extensionA, "Sin extensión") && !strcmp(extensionB, "Sin extensión")) {
         return 1;
     }
+
+    /* si quiero listar los pdf antes que los xopp
+    // Comparar extensiones .xopp
+    int comparacion = strcmp(extensionA, extensionB);
+    if (comparacion != 0) {
+        return comparacion;
+    }
+
+    return strcmp(nombreA, nombreB);
+    */
     
     // Comparar extensiones .xopp primero
     if (strcmp(extensionA, ".xopp") == 0 && strcmp(extensionB, ".xopp") != 0) {
@@ -365,29 +375,22 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
                 if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                 {
-                    
                     archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
                     archivosDirectorios[n][0] = '\0';
                     strcat(archivosDirectorios[n], dir->d_name);
                     n++;
-
-                    
-
                 }
-
-                
 
             }
             closedir(d);
         }
-
 
         //ordenar archivosDirectorios[n]   
         qsort(archivosDirectorios, n, sizeof(char *), compararArchivos);
 
         int i = 1;
         int j = 0;
-        for (int k = 0; k < n; k++)
+        for (int k = 0; k < n; k++) //mostrare els artxius un cop ordenats
         {
             
             if(!strcmp(obtenerExtension(archivosDirectorios[k]), "Sin extensión")) // si es un directorio
