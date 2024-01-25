@@ -7,6 +7,7 @@
 
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/";
+char directorioMas[1024] = "/home/gerard/Gerard/Projects/libreriaGrafica/plus_icon.png";
 gchar *nombre = "pdf";
 char *border_class = "border";
 #define ANCHO_PREV (59.5+80)
@@ -168,17 +169,55 @@ void box_add(GtkWidget *parent_box, char *class, const char * auxPrev, gpointer 
 
 void afegirPredeterminat(GtkWidget *main_box)
 {
-    // Crear el botón
-    GtkWidget *normalButton = gtk_button_new_with_label("+");
+    // Crear un contenedor para el botón y la vista previa
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-    gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
+    // Cargar la imagen de vista previa del PDF en un GtkImage
+    GError *error = NULL;
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(directorioMas, &error);
 
-    gtk_grid_attach(GTK_GRID(main_box), normalButton, 0, 0, 1, 1);
+    if (!pixbuf) {
+        g_printerr("Error cargando la imagen: %s\n", error->message);
+        g_error_free(error);
+        return;
+    }
 
-    g_signal_connect(normalButton, "clicked", G_CALLBACK(abrirXournal), NULL);
+    GdkPixbuf *scaled_pixbuf = gdk_pixbuf_scale_simple(pixbuf, 20, 20, GDK_INTERP_BILINEAR);
+
+    if (!scaled_pixbuf) {
+        g_printerr("Error escalando la imagen.\n");
+        g_object_unref(pixbuf);
+        return;
+    }
+
+    g_object_unref(pixbuf);  // Liberar el pixbuf original después de escalar
+
+    GtkWidget *image = gtk_image_new_from_pixbuf(scaled_pixbuf);
+
+    // Crear un GtkButton con la vista previa como contenido
+    GtkWidget *button = gtk_button_new();
+    gtk_container_add(GTK_CONTAINER(button), image);
+    gtk_container_add(GTK_CONTAINER(box), button);
+
+    gtk_widget_set_size_request(button, ANCHO_PREV, ALTURA_PREV);
+
+    g_signal_connect(button, "clicked", G_CALLBACK(abrirXournal), NULL);
+
+    gtk_widget_set_margin_start(box, MARGIN);
+    gtk_widget_set_margin_end(box, MARGIN);
+    gtk_widget_set_margin_top(box, MARGIN);
+    gtk_widget_set_margin_bottom(box, MARGIN);
+
+    gtk_grid_attach(GTK_GRID(main_box), box, 0, 0, 1, 1);
+
+
+
+    // Liberar el pixbuf escalado después de usarlo
+    g_object_unref(scaled_pixbuf);
 
     gtk_widget_show_all(main_box);
 }
+
 
 
 
@@ -217,15 +256,15 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name)
     gtk_container_add(GTK_CONTAINER(button), image);
     gtk_container_add(GTK_CONTAINER(box), button);
 
-    UserData *userdata = g_new(UserData, 1);
+    UserData *userdataNew = g_new(UserData, 1);
     
-    strncpy(userdata->some_value, d_name, sizeof(userdata->some_value) - 1);
-    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+    strncpy(userdataNew->some_value, d_name, sizeof(userdataNew->some_value) - 1);
+    userdataNew->some_value[sizeof(userdataNew->some_value) - 1] = '\0';
 
-    userdata->box = button_data->box;
-    g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), userdata);
-    g_signal_connect(button, "enter-notify-event", G_CALLBACK(on_button_hover), userdata);
-    g_signal_connect(button, "leave-notify-event", G_CALLBACK(on_button_unhover), userdata);
+    userdataNew->box = button_data->box;
+    g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), userdataNew);
+    g_signal_connect(button, "enter-notify-event", G_CALLBACK(on_button_hover), userdataNew);
+    g_signal_connect(button, "leave-notify-event", G_CALLBACK(on_button_unhover), userdataNew);
 
     return box;
 }
@@ -502,17 +541,19 @@ static void activate (GtkApplication *app, gpointer user_data){
     gtk_label_set_yalign(GTK_LABEL(view), 0.0); // Alineación en la parte superior
     gtk_widget_set_size_request(view, 300, 20);
     
+    
     window = gtk_application_window_new(app); //decimos que window sera una ventana de aplicacion
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit),NULL);
     gtk_window_set_title(GTK_WINDOW(window), "Libreta Para Xournalpp");
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
+    gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
+    gtk_window_maximize(GTK_WINDOW(window));
 
     //creamos y metemos en window el contenedor main
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
-    files = gtk_grid_new();
+    files = gtk_grid_new();    
 
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
     
     gtk_container_add(GTK_CONTAINER(window), main);
