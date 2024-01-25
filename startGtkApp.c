@@ -3,15 +3,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h> 
+#include <libxml2/libxml/parser.h>
 
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
+char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/";
+gchar *nombre = "pdf";
+#define ANCHO_PREV (59.5+80)
+#define ALTURA_PREV (84.1+80)
+#define MARGIN 10
 
 typedef struct {
-    int some_value;
+    char some_value[1024];
     GtkWidget *box;
 } UserData;
 
 void create_menu(GtkWidget *, GtkWidget *);
+void pdf_to_image(const char *, const char *);
+void on_button_clicked(GtkWidget *, gpointer );
+void base64_to_image(const char *, const char *);
+xmlChar* copiar_y_extraer_preview(const char *, const char *);
+void addWhiteBackground(const char *, const char *);
 
 /***
  * @brief funcion que elimina desde la última barra encontrada en esa cadena hasta el final
@@ -93,12 +104,66 @@ void abrirXournal()
 
 void afegirPredeterminat(GtkWidget *main_box)
 {
+    // Crear el botón
     GtkWidget *normalButton = gtk_button_new_with_label("+");
-    gtk_container_add(GTK_CONTAINER(main_box), normalButton);
-    
+
+    gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
+
+    gtk_grid_attach(GTK_GRID(main_box), normalButton, 0, 0, 1, 1);
+
     g_signal_connect(normalButton, "clicked", G_CALLBACK(abrirXournal), NULL);
 
     gtk_widget_show_all(main_box);
+}
+
+
+void on_button_hover(GtkWidget *widget, GdkEvent *event, gpointer data) {
+    UserData *button_data = (UserData *)data;
+    gchar *tooltip = gtk_widget_get_tooltip_text(widget);
+
+    if (!tooltip) {
+        // Si no hay tooltip, establecer el texto
+        gtk_widget_set_tooltip_text(widget, button_data->some_value);
+    }
+}
+
+void on_button_unhover(GtkWidget *widget, gpointer data) {
+    // Limpiar el tooltip cuando el ratón deja el área del widget
+    gtk_widget_set_tooltip_text(widget, NULL);
+}
+
+
+GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name) {
+    UserData *button_data = (UserData *)data;
+
+    // Crear un contenedor para el botón y la vista previa
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+    // Cargar la imagen de vista previa del PDF en un GtkImage
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+    GdkPixbuf *scaled_pixbuf = gdk_pixbuf_scale_simple( pixbuf, ANCHO_PREV, ALTURA_PREV, GDK_INTERP_BILINEAR);
+    g_object_unref(pixbuf);  // Liberar el pixbuf original después de escalar
+    GtkWidget *image = gtk_image_new_from_pixbuf(scaled_pixbuf);
+
+    // Crear un GtkButton con la vista previa como contenido
+    GtkWidget *button = gtk_button_new();
+    gtk_widget_set_name(button, nombre);
+    gtk_widget_set_size_request(button, 50, 50);  // Establecer el tamaño del botón
+    gtk_container_add(GTK_CONTAINER(button), image);
+    gtk_container_add(GTK_CONTAINER(box), button);
+
+    UserData *userdata = g_new(UserData, 1);
+    
+    strncpy(userdata->some_value, d_name, sizeof(userdata->some_value) - 1);
+    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+
+    userdata->box = button_data->box;
+    g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), userdata);
+    g_signal_connect(button, "enter-notify-event", G_CALLBACK(on_button_hover), userdata);
+    g_signal_connect(button, "leave-notify-event", G_CALLBACK(on_button_unhover), userdata);
+
+
+    return box;
 }
 
 /**
@@ -110,20 +175,42 @@ void afegirPredeterminat(GtkWidget *main_box)
 void on_button_clicked(GtkWidget *widget, gpointer data) {
 
     UserData *button_data = (UserData *)data;
-
-    //obrir fitxer en el cas que sigui d'extensio .xopp
-    if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".xopp") || !strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".pdf"))
+    
+    if(strcmp(gtk_widget_get_name(widget), nombre) == 0)
     {
         char comando[1024] = "";
-        char xournal[11] = "xournalpp "; 
+        char xournal[1024] = "xournalpp "; 
+        strcat(comando, cwd);
+        strcat(comando, "/");
+        strcat(comando, button_data->some_value);
+        strcat(xournal, agregarBarras(comando));
+        system(strcat(xournal, " &")); //para que se vaya al background
+    }
+    else if(strcmp(gtk_widget_get_name(widget), "xournal") == 0)
+    {
+        char comando[1024] = "";
+        char xournal[1024] = "xournalpp "; 
+        strcat(comando, cwd);
+        strcat(comando, "/");
+        strcat(comando, button_data->some_value);
+        strcat(xournal, agregarBarras(comando));
+        system(strcat(xournal, " &")); //para que se vaya al background
+    }
+    //obrir fitxer en el cas que sigui d'extensio .xopp
+    else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".xopp") || !strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), ".pdf"))
+    {
+        
+        char comando[1024] = "";
+        char xournal[1024] = "xournalpp "; 
         strcat(comando, cwd);
         strcat(comando, "/");
         strcat(comando, gtk_button_get_label(GTK_BUTTON(widget)));
         strcat(xournal, agregarBarras(comando));
         system(strcat(xournal, " &")); //para que se vaya al background
     }
-    else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori)
+    else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
     {
+        
         // si no he pulsat button1, cambiar de directori al que marqui cwd
         if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "button1"))
         {
@@ -176,7 +263,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         d = opendir(cwd);
         if (d) 
         {
-            int i = 0;
+            int i = 1;
             int j = 0;
             while ((dir = readdir(d)) != NULL) 
             {
@@ -185,21 +272,102 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es mostraran
                 if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                 {
-                    //posar widgets al box   
-                    GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
-                    gtk_widget_set_margin_start(normalButton, 5);
-                    gtk_widget_set_margin_end(normalButton, 5);
-                    gtk_widget_set_margin_top(normalButton, 5);
-                    gtk_widget_set_margin_bottom(normalButton, 5);
+                    if(!strcmp(obtenerExtension(dir->d_name), "Sin extensión")) // si es un directorio
+                    {
+                        //posar widgets al box   
+                        GtkWidget *normalButton = gtk_button_new_with_label(dir->d_name);
+                        gtk_widget_set_margin_start(normalButton, MARGIN);
+                        gtk_widget_set_margin_end(normalButton, MARGIN);
+                        gtk_widget_set_margin_top(normalButton, MARGIN);
+                        gtk_widget_set_margin_bottom(normalButton, MARGIN);
 
-                    gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+                        gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
+
+                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+
+
+
+                        UserData *userdata = g_new(UserData, 1);
+                        strncpy(button_data->some_value, dir->d_name, sizeof(button_data->some_value) - 1);
+                        button_data->some_value[sizeof(button_data->some_value) - 1] = '\0';
+
+                        
+                        
+                        userdata->box = button_data->box;
+                        g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+                    }
+                    else if(!strcmp(obtenerExtension(dir->d_name), ".pdf")) // si es pdf
+                    {
+                        char auxPdf[1024] = "";
+                        char auxPrev[1024] = "";
+
+                        strcat(auxPdf, cwd);
+                        strcat(auxPdf, "/");
+                        strcat(auxPdf, dir->d_name);
+
+                        strcat(auxPrev, guardarPrevisualizaciones);
+                        strcat(auxPrev, dir->d_name);
+                        strcat(auxPrev, ".png");
+
+                        pdf_to_image(auxPdf, auxPrev);
+
+                        
+                        GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
+                        gtk_widget_set_margin_start(normalButton, MARGIN);
+                        gtk_widget_set_margin_end(normalButton, MARGIN);
+                        gtk_widget_set_margin_top(normalButton, MARGIN);
+                        gtk_widget_set_margin_bottom(normalButton, MARGIN);
+                        gtk_widget_set_name(normalButton, "pdf");
+
+                        //poner nombre abajo
+                        GtkWidget *label = gtk_label_new(NULL);
+                        gtk_label_set_markup(GTK_LABEL(label), dir->d_name);
+                        gtk_container_add(GTK_CONTAINER(normalButton), label);
+
+
+                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+
+
+
+                    }
+                    else // si es xopp
+                    {
+
+                        char auxXopp[1024] = "";
+                        char auxPrev[1024] = "";
+
+                        strcat(auxXopp, cwd);
+                        strcat(auxXopp, "/");
+                        strcat(auxXopp, dir->d_name);
+
+                        strcat(auxPrev, guardarPrevisualizaciones);
+                        strcat(auxPrev, dir->d_name);
+                        strcat(auxPrev, ".png");
+
+                        base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
+                        //addWhiteBackground(auxPrev, auxPrev);
+                        
+                        GtkWidget *normalButton = create_file_button(auxPrev, data, dir->d_name);
+                        gtk_widget_set_margin_start(normalButton, MARGIN);
+                        gtk_widget_set_margin_end(normalButton, MARGIN);
+                        gtk_widget_set_margin_top(normalButton, MARGIN);
+                        gtk_widget_set_margin_bottom(normalButton, MARGIN);
+                        gtk_widget_set_name(normalButton, "xournal");
+
+                        //poner nombre abajo
+                        GtkWidget *label = gtk_label_new(NULL);
+                        gtk_label_set_markup(GTK_LABEL(label), dir->d_name);
+                        gtk_container_add(GTK_CONTAINER(normalButton), label);
+
+
+                        gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
+
+
+                    }
+
                     
-                    UserData *userdata = g_new(UserData, 1);
-                    button_data->some_value = 42;
-                    userdata->box = button_data->box;
-                    g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
-
-                    if(i == 2 ){
+                    //nombre de columnes q vull que tingui
+                    if(i == 3 ){
                         i = 0;
                         j += 1;
                     }
@@ -207,6 +375,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                         i += 1;
 
                 }
+
+                
 
             }
             closedir(d);
@@ -235,6 +405,8 @@ static void activate (GtkApplication *app, gpointer user_data){
     gtk_label_set_markup(GTK_LABEL(view),result);
     gtk_label_set_xalign(GTK_LABEL(view), 0.0); // Alineación a la izquierda
     gtk_label_set_yalign(GTK_LABEL(view), 0.0); // Alineación en la parte superior
+
+    //gtk_label_set_ellipsize(gtk_button_get_label(GTK_LABEL(view)), PANGO_ELLIPSIZE_END);
     
 
 
@@ -266,7 +438,8 @@ static void activate (GtkApplication *app, gpointer user_data){
 
     //Declaramos UserData y decimos que cuando se haga click en el boton 1 se ejecute la funcion on_button_clicked
     UserData *userdata = g_new(UserData, 1);
-    userdata->some_value = 42;
+    strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
+    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
     userdata->box = files;
     g_signal_connect(button1, "clicked", G_CALLBACK(on_button_clicked), userdata);
     
