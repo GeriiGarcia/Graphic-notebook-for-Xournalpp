@@ -80,7 +80,7 @@ xmlChar* copiar_y_extraer_preview(const char *ruta_origen, const char *ruta_dest
 
     // Copiar el fichero al directorio destino y cambiar la extensión a .gz
    
-    sprintf(comando, "cp %s %s", ruta_origen, ruta_destino);
+    sprintf(comando, "cp %s %s.gz", ruta_origen, ruta_destino);
     system(comando);
 
     printf("Copiando con el comando: %s\n", comando);

@@ -399,35 +399,45 @@ static void activate (GtkApplication *app, gpointer user_data){
     strcat(result, cwd);
     strcat(result, " </b></big>");
 
+
+    GtkWidget *container = gtk_fixed_new();
+   
+
     GtkWidget *view;
 
     view = gtk_label_new(cwd);
     gtk_label_set_markup(GTK_LABEL(view),result);
     gtk_label_set_xalign(GTK_LABEL(view), 0.0); // Alineación a la izquierda
     gtk_label_set_yalign(GTK_LABEL(view), 0.0); // Alineación en la parte superior
-
-    //gtk_label_set_ellipsize(gtk_button_get_label(GTK_LABEL(view)), PANGO_ELLIPSIZE_END);
+    gtk_widget_set_size_request(view, 300, 20);
+    
     
 
 
     window = gtk_application_window_new(app); //decimos que window sera una ventana de aplicacion
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit),NULL);
-    gtk_window_set_title(GTK_WINDOW(window), "LlunaLaMejor&HarryStyles<3");
+    gtk_window_set_title(GTK_WINDOW(window), "Libreta Para Xournalpp");
     gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 
     //creamos y metemos en window el contenedor main
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
     files = gtk_grid_new();
+
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
     
     gtk_container_add(GTK_CONTAINER(window), main);
     
 
     //gtk_box_pack_start(GTK_BOX(window),main,TRUE,TRUE, 50);
-    gtk_box_pack_end(GTK_BOX(main), files, TRUE, TRUE, 10);
+    gtk_container_add(GTK_CONTAINER(scrolled_window), files);
+    gtk_box_pack_end(GTK_BOX(main), scrolled_window, TRUE, TRUE, 10);
 
 
     gtk_widget_set_halign(files, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(files, GTK_ALIGN_FILL);
+
 
 
     //la primera pantalla la deixare per si vull posar més d'una opcio quan s'inicii l'aplicacio, com opcions de configuracio o algo aixi.
@@ -443,9 +453,11 @@ static void activate (GtkApplication *app, gpointer user_data){
     userdata->box = files;
     g_signal_connect(button1, "clicked", G_CALLBACK(on_button_clicked), userdata);
     
+    gtk_fixed_put(GTK_FIXED(container), view, 5, 5);
+    
+    gtk_container_add(GTK_CONTAINER(main), container);
+    //gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
 
-    gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
-    //gtk_box_pack_end(GTK_BOX(files), button1, TRUE, TRUE, 10);
  
     gtk_widget_show_all(window);
 

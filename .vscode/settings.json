@@ -60,6 +60,7 @@
   "files.associations": {
     "*.embeddedhtml": "html",
     "gtk.h": "c",
-    "dirent.h": "c"
+    "dirent.h": "c",
+    "sstream": "c"
   }
 }
