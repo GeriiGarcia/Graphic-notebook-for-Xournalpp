@@ -99,7 +99,8 @@ char* agregarBarras(char *cadena) {
     // Agregar el carácter nulo al final de la nueva cadena
     nuevaCadena[indiceNuevo] = '\0';
 
-    printf("%s\n",nuevaCadena);
+    //print de la cadena nueva
+    //printf("%s\n",nuevaCadena);
 
     return nuevaCadena;
 }
