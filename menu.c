@@ -78,7 +78,8 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
 
                 system(mkdir);
 
-                //per refrescar la pagina a veure si puc
+                //per refrescar la pagina 
+                //El que faig es afegir un element amb el nom Predeterminat a la grid i per-li click "artificialment"
                 GtkWidget *main = gtk_widget_get_parent(textWidget);
                 main = gtk_widget_get_parent(main);
 
