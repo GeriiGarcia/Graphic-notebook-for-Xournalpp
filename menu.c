@@ -65,7 +65,6 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
         {
         case NUEVA_CARPETA:
             
-
             if(strcmp(widget_value, ""))
             {
                 char aux[2048]="";
@@ -78,22 +77,40 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 strcat(mkdir, aux2);
 
                 system(mkdir);
+
+                //per refrescar la pagina a veure si puc
+                GtkWidget *main = gtk_widget_get_parent(textWidget);
+                main = gtk_widget_get_parent(main);
+
+                texto = "files";
+                GtkWidget *grid = get_widget_by_name(GTK_CONTAINER(main), texto);
+                GtkWidget *auxButton = gtk_button_new_with_label("Predeterminado");
+                gtk_grid_attach(GTK_GRID(grid), auxButton, 0, 0, 50, 50);
+
+                UserData *userdata = g_new(UserData, 1);
+                strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
+                userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+                userdata->box = grid;
+                on_button_clicked(GTK_WIDGET(auxButton), userdata);
             }
             break;
 
         case NUEVO_XOURNAL:
-            char aux[2048]="";
-            strcat(aux, cwd);
-            strcat(aux, "/");
-            strcat(aux, widget_value);
-            char *aux2 = agregarBarras(aux); 
 
-            char xournalpp[2056] = "xournalpp ";
-            strcat(xournalpp, aux2);
-            strcat(xournalpp, " &");
+            if(strcmp(widget_value, ""))
+            {
+                char aux[2048]="";
+                strcat(aux, cwd);
+                strcat(aux, "/");
+                strcat(aux, widget_value);
+                char *aux2 = agregarBarras(aux); 
 
-            system(xournalpp);
+                char xournalpp[2056] = "xournalpp ";
+                strcat(xournalpp, aux2);
+                strcat(xournalpp, " &");
 
+                system(xournalpp);
+            }
             break;
         default:
             break;

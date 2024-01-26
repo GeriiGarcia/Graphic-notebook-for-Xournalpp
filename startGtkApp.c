@@ -261,7 +261,8 @@ static void activate (GtkApplication *app, gpointer user_data){
 
     //creamos y metemos en window el contenedor main
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
-    files = gtk_grid_new();    
+    files = gtk_grid_new();  
+    gtk_widget_set_name(files, "files");  
 
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
