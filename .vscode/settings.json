@@ -63,6 +63,10 @@
     "dirent.h": "c",
     "sstream": "c",
     "variables.h": "c",
-    "parser.h": "c"
+    "parser.h": "c",
+    "bitset": "c",
+    "memory": "c",
+    "random": "c",
+    "optional": "c"
   }
 }

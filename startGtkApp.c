@@ -7,7 +7,7 @@ char *css =
     ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
     ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; }\n"
     ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
-
+int opcionesMenu[20];
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
  * 
@@ -139,7 +139,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 gtk_widget_set_margin_top(normalButton, MARGIN);
                 gtk_widget_set_margin_bottom(normalButton, MARGIN);
 
-                gtk_widget_set_size_request(normalButton, ANCHO_PREV, ALTURA_PREV);
+                gtk_widget_set_size_request(normalButton, ANCHO_PREV + 50, ALTURA_PREV + 50);
 
                 gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
 
@@ -224,8 +224,25 @@ static void activate (GtkApplication *app, gpointer user_data){
     strcat(result, " </b></big>");
 
 
-    GtkWidget *container = gtk_fixed_new();
-    gtk_widget_set_name(container, "fijo");
+    GtkWidget *containerPath = gtk_fixed_new();
+    gtk_widget_set_name(containerPath, "fijo");
+
+
+    
+
+    GtkWidget *text = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(text), "");
+    gtk_widget_set_name(text, "textOption");
+    gtk_widget_set_size_request(text, 170, 20);
+
+    GtkWidget *ok = gtk_button_new_with_label("OK");
+    gtk_widget_set_name(ok, "buttonOk");
+
+    UserData *runData = g_new(UserData, 1);
+    runData->box = containerPath;
+    g_signal_connect(ok, "clicked", G_CALLBACK(runOk), runData);
+    
+
    
     GtkWidget *view;
 
@@ -276,16 +293,21 @@ static void activate (GtkApplication *app, gpointer user_data){
     userdata->box = files;
     g_signal_connect(button1, "clicked", G_CALLBACK(on_button_clicked), userdata);
     
-    gtk_fixed_put(GTK_FIXED(container), view, 5, 5);
+    gtk_fixed_put(GTK_FIXED(containerPath), view, 5, 5);
+
+    gtk_fixed_put(GTK_FIXED(containerPath), text, 1050,2);
+    gtk_fixed_put(GTK_FIXED(containerPath), ok, 1050+175, 2);
     
-    gtk_container_add(GTK_CONTAINER(main), container);
+    gtk_container_add(GTK_CONTAINER(main), containerPath);
     //gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
 
  
     gtk_widget_show_all(window);
 
     
-    
+    gtk_widget_hide(text);
+    gtk_widget_hide(ok);
+
     gtk_main();
     g_free(userdata);
 }

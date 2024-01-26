@@ -18,10 +18,20 @@
 #define ALTURA_PREV (84.1+80)
 #define MARGIN 10
 
+#define NUEVA_CARPETA 0
+
 extern char cwd[10000];  // Definición de cwd
 extern char guardarPrevisualizaciones[1024];  // Definición de guardarPrevisualizaciones
 extern char directorioMas[1024];  // Definición de directorioMas
 extern char *css;
+
+
+/***
+ * @param opciones[0] Nueva carpeta
+ * 
+ * 
+*/
+extern int opcionesMenu[20];
 
 typedef struct {
     char some_value[1024];
@@ -42,5 +52,6 @@ void css_add(char *);
 int compararArchivos(const void *, const void *);
 void afegirPredeterminat(GtkWidget *);
 void box_add(GtkWidget *, char *, const char * , gpointer , char * , int , int , int );
+void runOk();
 
 #endif // INCLUDES_H

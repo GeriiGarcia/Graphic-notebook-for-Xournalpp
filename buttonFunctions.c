@@ -78,7 +78,7 @@ void afegirPredeterminat(GtkWidget *main_box)
     gtk_container_add(GTK_CONTAINER(button), image);
     gtk_container_add(GTK_CONTAINER(box), button);
 
-    gtk_widget_set_size_request(button, ANCHO_PREV, ALTURA_PREV);
+    gtk_widget_set_size_request(button, ANCHO_PREV + 50 , ALTURA_PREV + 50);
 
     g_signal_connect(button, "clicked", G_CALLBACK(abrirXournal), NULL);
 
