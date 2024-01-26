@@ -18,17 +18,18 @@
 #define ALTURA_PREV (84.1+80)
 #define MARGIN 10
 
-#define NUEVA_CARPETA 0
+
 
 extern char cwd[10000];  // Definición de cwd
 extern char guardarPrevisualizaciones[1024];  // Definición de guardarPrevisualizaciones
 extern char directorioMas[1024];  // Definición de directorioMas
 extern char *css;
 
-
+#define NUEVA_CARPETA 0
+#define NUEVO_XOURNAL 19
 /***
  * @param opciones[0] Nueva carpeta
- * 
+ * @param opciones[19] Nuevo Xournal
  * 
 */
 extern int opcionesMenu[20];
@@ -52,6 +53,6 @@ void css_add(char *);
 int compararArchivos(const void *, const void *);
 void afegirPredeterminat(GtkWidget *);
 void box_add(GtkWidget *, char *, const char * , gpointer , char * , int , int , int );
-void runOk();
+void runOk(GtkWidget *, gpointer ); 
 
 #endif // INCLUDES_H

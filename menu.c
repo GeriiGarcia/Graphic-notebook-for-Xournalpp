@@ -79,10 +79,22 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
 
                 system(mkdir);
             }
-            
-            
             break;
 
+        case NUEVO_XOURNAL:
+            char aux[2048]="";
+            strcat(aux, cwd);
+            strcat(aux, "/");
+            strcat(aux, widget_value);
+            char *aux2 = agregarBarras(aux); 
+
+            char xournalpp[2056] = "xournalpp ";
+            strcat(xournalpp, aux2);
+            strcat(xournalpp, " &");
+
+            system(xournalpp);
+
+            break;
         default:
             break;
         }

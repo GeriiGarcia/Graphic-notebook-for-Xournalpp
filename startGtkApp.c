@@ -33,7 +33,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     {
         
         // si no he pulsat button1, cambiar de directori al que marqui cwd
-        if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "button1"))
+        if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado"))
         {
             if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
                 quitarDesdeUltimaBarra(cwd);
@@ -281,7 +281,7 @@ static void activate (GtkApplication *app, gpointer user_data){
 
 
     //la primera pantalla la deixare per si vull posar més d'una opcio quan s'inicii l'aplicacio, com opcions de configuracio o algo aixi.
-    button1 = gtk_button_new_with_label("button1"); //creamos el boton 1
+    button1 = gtk_button_new_with_label("Predeterminado"); //creamos el boton 1
     gtk_grid_attach(GTK_GRID(files), button1, 0, 0, 50, 50);
 
     create_menu(main, window);

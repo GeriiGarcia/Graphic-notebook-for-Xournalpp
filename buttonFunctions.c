@@ -1,10 +1,12 @@
 #include "includes.h"
 
 
-void abrirXournal();
+void abrirXournal(GtkWidget *, gpointer );
 void on_button_clicked(GtkWidget *, gpointer );
 void afegirPredeterminat(GtkWidget *);
 GtkWidget *create_file_button(const char *, gpointer , char *);
+GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
+void ponerOpcionesACero();
 
 /***
  * @brief sirve para añadir un pdf o xopp a la grid, teniendo en cuenta que cada uno tiene un marco diferente
@@ -80,7 +82,10 @@ void afegirPredeterminat(GtkWidget *main_box)
 
     gtk_widget_set_size_request(button, ANCHO_PREV + 50 , ALTURA_PREV + 50);
 
-    g_signal_connect(button, "clicked", G_CALLBACK(abrirXournal), NULL);
+    UserData *data = g_new(UserData, 1);
+    data->box = main_box;
+
+    g_signal_connect(button, "clicked", G_CALLBACK(abrirXournal), data);
 
     gtk_widget_set_margin_start(box, MARGIN);
     gtk_widget_set_margin_end(box, MARGIN);
@@ -149,7 +154,26 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name)
 }
 
 
-void abrirXournal()
+void abrirXournal(GtkWidget *widget, gpointer data)
 {
-    system("xournalpp &");
+    UserData *button_data = (UserData *)data;
+
+    GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+    parent = gtk_widget_get_parent(parent);
+    parent = gtk_widget_get_parent(parent);
+
+    printf("Nombre del padre de main_box: %s\n", gtk_widget_get_name(parent));
+
+    gchar *texto = "textOption";
+    GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(parent), texto);
+    texto = "buttonOk";
+    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(parent), texto);
+
+    gtk_widget_show(textWidget);
+    gtk_widget_show(buttonOk);
+    gtk_entry_set_text(GTK_ENTRY(textWidget), "'Nombre de Archivo'");
+
+    ponerOpcionesACero();
+    opcionesMenu[NUEVO_XOURNAL] = 1;
+    
 }
