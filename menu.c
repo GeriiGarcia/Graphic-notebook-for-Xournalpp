@@ -1,4 +1,4 @@
-#include <gtk/gtk.h>
+#include "includes.h"
 
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {

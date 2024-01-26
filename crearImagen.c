@@ -1,9 +1,5 @@
-#include <stdio.h>
-#include <cairo.h>
-#include <poppler/glib/poppler.h>
-#include <libxml2/libxml/parser.h>
-#include <libxml2/libxml/tree.h>
-#include <FreeImage.h>
+#include "includes.h"
+
 
 void pdf_to_image(const char *pdf_filename, const char *image_filename) {
     GError *error = NULL;

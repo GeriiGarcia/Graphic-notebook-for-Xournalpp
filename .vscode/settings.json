@@ -61,6 +61,8 @@
     "*.embeddedhtml": "html",
     "gtk.h": "c",
     "dirent.h": "c",
-    "sstream": "c"
+    "sstream": "c",
+    "variables.h": "c",
+    "parser.h": "c"
   }
 }

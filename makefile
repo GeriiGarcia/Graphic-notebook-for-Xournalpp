@@ -1,5 +1,5 @@
 OBJS	= startGtkApp.o
-SOURCE	= startGtkApp.c menu.c crearImagen.c
+SOURCE	= startGtkApp.c menu.c crearImagen.c styleFunctions.c buttonFunctions.c
 HEADER	= 
 OUT	= start
 CC	 = gcc
