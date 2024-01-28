@@ -35,6 +35,51 @@ GtkWidget *get_widget_by_name(GtkContainer *container, const gchar *name) {
 }
 
 
+
+long long calcularTamanoCarpeta(const char *ruta) {
+    DIR *dir;
+    struct dirent *entrada;
+    struct stat infoArchivo;
+    long long tamanoTotal = 0;
+
+    dir = opendir(ruta);
+
+    if (dir == NULL) {
+        perror("Error al abrir el directorio");
+        return -1;
+    }
+
+    while ((entrada = readdir(dir)) != NULL) {
+        char rutaCompleta[2048];
+        snprintf(rutaCompleta, sizeof(rutaCompleta), "%s/%s", ruta, entrada->d_name);
+
+        if (stat(rutaCompleta, &infoArchivo) == 0) {
+            if (S_ISDIR(infoArchivo.st_mode)) {
+                if (strcmp(entrada->d_name, ".") != 0 && strcmp(entrada->d_name, "..") != 0) {
+                    // Recursivamente calcular el tamaño de subdirectorios
+                    long long tamanoSubDirectorio = calcularTamanoCarpeta(rutaCompleta);
+                    if (tamanoSubDirectorio >= 0) {
+                        tamanoTotal += tamanoSubDirectorio;
+                    } else {
+                        closedir(dir);
+                        return -1;
+                    }
+                }
+            } else {
+                // Sumar el tamaño de archivos regulares
+                tamanoTotal += infoArchivo.st_size;
+            }
+        } else {
+            perror("Error al obtener información del archivo");
+            closedir(dir);
+            return -1;
+        }
+    }
+
+    closedir(dir);
+    return tamanoTotal;
+}
+
 /***
  * @brief se le tiene que pasar un gpointer con un widget contenedor
 */
@@ -156,6 +201,45 @@ void reset(GtkWidget *widget, gpointer data)
     gtk_widget_hide(buttonOk);
 }
 
+void vaciarCache()
+{
+    system("rm -rf /home/$(whoami)/.libretaXournal");
+    system("mkdir /home/$(whoami)/.libretaXournal");
+}
+
+//encontrar items de un submenu del menu
+void encontrarHijos(GtkWidget *widget, gpointer data) {
+    const gchar *nombreWidget = gtk_widget_get_name(widget);
+
+    // Verificar si el widget tiene el nombre "vaciarCache"
+    if (nombreWidget != NULL && g_strcmp0(nombreWidget, "vaciarCache") == 0) {
+        const char *rutaCarpeta = "/home/gerard/.libretaXournal";
+        long long tamanoEnBytes = calcularTamanoCarpeta(rutaCarpeta);
+        double tamanoEnMB = (double)tamanoEnBytes / (1024 * 1024);
+        char cadena[2048];
+        sprintf(cadena, "Vaciar Caché: %f", tamanoEnMB);
+        gtk_menu_item_set_label(GTK_MENU_ITEM(widget), cadena);
+    }
+}
+
+void recargarTamaño(GtkWidget *widget, gpointer data)
+{
+
+    if (GTK_IS_MENU_ITEM(widget)) {
+        const gchar *nombreWidget = gtk_widget_get_name(widget);
+
+        // Verificar si el widget tiene el nombre "item3"
+        if (nombreWidget != NULL && g_strcmp0(nombreWidget, "item3") == 0) {
+            // Obtener el submenú
+            GtkWidget *submenu = gtk_menu_item_get_submenu(GTK_MENU_ITEM(widget));
+
+            // Iterar sobre los elementos del submenú
+            gtk_container_foreach(GTK_CONTAINER(submenu), encontrarHijos, NULL);
+        }
+    }
+
+}
+
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -218,15 +302,30 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     // Botón 3
     menu3 = gtk_menu_new();
     item3 = gtk_menu_item_new_with_label("Herramientas");
+    gtk_widget_set_name(item3, "item3");
+    g_signal_connect(G_OBJECT(item3), "activate", G_CALLBACK(recargarTamaño), "Item 3");
 
-    section3_1 = gtk_menu_item_new_with_label("Sección 3.1");
-    section3_2 = gtk_menu_item_new_with_label("Sección 3.2");
-
+    section3_1 = gtk_menu_item_new_with_label("passTo");
     g_signal_connect(G_OBJECT(section3_1), "activate", G_CALLBACK(on_menu_item_activate), "Sección 3.1");
+
+    section3_2 = gtk_menu_item_new_with_label("passTo UNI");
     g_signal_connect(G_OBJECT(section3_2), "activate", G_CALLBACK(on_menu_item_activate), "Sección 3.2");
+
+    const char *rutaCarpeta = "/home/gerard/.libretaXournal";
+    long long tamanoEnBytes = calcularTamanoCarpeta(rutaCarpeta);
+    double tamanoEnMB = (double)tamanoEnBytes / (1024 * 1024);
+    char cadena[2048];
+    sprintf(cadena, "Vaciar Caché: %f", tamanoEnMB);
+    GtkWidget *section3_3 = gtk_menu_item_new_with_label(cadena);
+    gtk_widget_set_name(section3_3, "vaciarCache");
+    g_signal_connect(G_OBJECT(section3_3), "activate", G_CALLBACK(vaciarCache), NULL);
+
+    
+    
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu3), section3_1);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu3), section3_2);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu3), section3_3);
 
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item3), menu3);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), item3);

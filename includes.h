@@ -14,6 +14,12 @@
 #include <libxml2/libxml/tree.h>
 #include <FreeImage.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+
+
 #define ANCHO_PREV (59.5+80)
 #define ALTURA_PREV (84.1+80)
 #define MARGIN 10
@@ -27,10 +33,11 @@ extern char *css;
 
 #define NUEVA_CARPETA 0
 #define NUEVO_XOURNAL 19
+#define VACIAR_CACHE 1
 /***
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
- * 
+ * @param opciones[1] Vaciar Caché
 */
 extern int opcionesMenu[20];
 
