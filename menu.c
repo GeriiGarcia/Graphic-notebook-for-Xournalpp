@@ -8,19 +8,7 @@ void ponerOpcionesACero()
 }
 
 
-gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
-{
-    
-    if (event->keyval == GDK_KEY_F5) {
-        refrescarDirectori(widget, user_data);
-        return TRUE; // Indica que se ha manejado el evento
-    }
-    else if(event->keyval == GDK_KEY_Return){
-        printf("askdjbasjd\n");
-    }
 
-    return FALSE; // Permite que otros manejadores de eventos procesen la tecla
-}
 
 GtkWidget *get_widget_by_name(GtkContainer *container, const gchar *name) {
     GList *children = gtk_container_get_children(container);
@@ -51,6 +39,30 @@ GtkWidget *get_widget_by_name(GtkContainer *container, const gchar *name) {
     return NULL;
 }
 
+
+gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+    UserData *button_data = (UserData *)user_data;
+    
+    if (event->keyval == GDK_KEY_F5) {
+        refrescarDirectori(widget, user_data);
+        return TRUE; // Indica que se ha manejado el evento
+    }
+    else if(event->keyval == GDK_KEY_Return){
+        GtkWidget *box = gtk_widget_get_parent(button_data->box);
+        box = gtk_widget_get_parent(box);
+        box = gtk_widget_get_parent(box);
+        box = get_widget_by_name(GTK_CONTAINER(box), "fijo");
+
+        GtkWidget *botoOk = get_widget_by_name(GTK_CONTAINER(box), "buttonOk");
+
+        UserData *userdata = g_new(UserData, 1);
+        userdata->box = box;
+        runOk(botoOk, userdata);
+    }
+
+    return FALSE; // Permite que otros manejadores de eventos procesen la tecla
+}
 
 
 long long calcularTamanoCarpeta(const char *ruta) {
@@ -178,12 +190,14 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
         default:
             break;
         }
+
+        gtk_entry_set_text(GTK_ENTRY(textWidget), "");
+        gtk_widget_hide(textWidget);
+        gtk_widget_hide(botonOk);
+        ponerOpcionesACero();
     }
 
-    gtk_entry_set_text(GTK_ENTRY(textWidget), "");
-    gtk_widget_hide(textWidget);
-    gtk_widget_hide(botonOk);
-    ponerOpcionesACero();
+    
     
     
     
