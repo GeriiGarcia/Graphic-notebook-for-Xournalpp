@@ -7,11 +7,27 @@ void ponerOpcionesACero()
         opcionesMenu[i] = 0;
 }
 
+
+gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+    
+    if (event->keyval == GDK_KEY_F5) {
+        refrescarDirectori(widget, user_data);
+        return TRUE; // Indica que se ha manejado el evento
+    }
+    else if(event->keyval == GDK_KEY_Return){
+        printf("askdjbasjd\n");
+    }
+
+    return FALSE; // Permite que otros manejadores de eventos procesen la tecla
+}
+
 GtkWidget *get_widget_by_name(GtkContainer *container, const gchar *name) {
     GList *children = gtk_container_get_children(container);
 
     while (children != NULL) {
         GtkWidget *child = GTK_WIDGET(children->data);
+
         if (gtk_widget_get_name(child) != NULL && g_strcmp0(gtk_widget_get_name(child), name) == 0) {
             // Se encontró el widget con el nombre deseado
             g_list_free(children);
@@ -241,6 +257,27 @@ void recargarTamaño(GtkWidget *widget, gpointer data)
 
 }
 
+void refrescarDirectori(GtkWidget *widget, gpointer data)
+{
+    UserData *button_data = (UserData *)data;
+
+    GtkWidget *box = gtk_widget_get_parent(button_data->box);
+    
+    box = get_widget_by_name(GTK_CONTAINER(box), "files");
+
+    //per refrescar la pagina 
+    //El que faig es afegir un element amb el nom Predeterminat a la grid i per-li click "artificialment"
+    GtkWidget *auxButton = gtk_button_new_with_label("Predeterminado");
+    gtk_grid_attach(GTK_GRID(box), auxButton, 0, 0, 50, 50);
+
+    UserData *userdata = g_new(UserData, 1);
+    strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
+    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+    userdata->box = box;
+    on_button_clicked(GTK_WIDGET(auxButton), userdata);
+
+}
+
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -287,15 +324,27 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     // Botón 2
     menu2 = gtk_menu_new();
     item2 = gtk_menu_item_new_with_label("Navegación");
+    gtk_widget_set_name(item2, "item2");
 
-    section2_1 = gtk_menu_item_new_with_label("Sección 2.1");
-    section2_2 = gtk_menu_item_new_with_label("Sección 2.2");
+    section2_1 = gtk_menu_item_new_with_label("Mostrar PDFs?");
+    section2_2 = gtk_menu_item_new_with_label("Mostrar previsializaciones?");
+    GtkWidget *section2_3 = gtk_menu_item_new_with_label("Cambiar ruta predeterminada");
+    GtkWidget *section2_4 = gtk_menu_item_new_with_label("Tipo de orden");
+    GtkWidget *section2_5 = gtk_menu_item_new_with_label("Refrescar directorio f5");
+    GtkWidget *section2_6 = gtk_menu_item_new_with_label("Volver a inicio");
 
-    g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(on_menu_item_activate), "Sección 2.1");
-    g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(on_menu_item_activate), "Sección 2.2");
-
+    g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_3), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_4), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_5), "activate", G_CALLBACK(refrescarDirectori), data);
+    g_signal_connect(G_OBJECT(section2_6), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_1);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_2);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_3);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_4);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_5);
 
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item2), menu2);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), item2);

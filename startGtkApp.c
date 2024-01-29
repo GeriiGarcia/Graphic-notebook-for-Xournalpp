@@ -265,6 +265,7 @@ static void activate (GtkApplication *app, gpointer user_data){
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
     files = gtk_grid_new();  
     gtk_widget_set_name(files, "files");  
+    gtk_widget_set_name(window, "main");  
 
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -304,7 +305,8 @@ static void activate (GtkApplication *app, gpointer user_data){
     gtk_container_add(GTK_CONTAINER(main), containerPath);
     //gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
 
- 
+    
+    g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(on_key_press), userdata);
     gtk_widget_show_all(window);
 
     

@@ -61,5 +61,7 @@ int compararArchivos(const void *, const void *);
 void afegirPredeterminat(GtkWidget *);
 void box_add(GtkWidget *, char *, const char * , gpointer , char * , int , int , int );
 void runOk(GtkWidget *, gpointer ); 
+gboolean on_key_press(GtkWidget *, GdkEventKey *, gpointer );
+void refrescarDirectori(GtkWidget *, gpointer );
 
 #endif // INCLUDES_H
