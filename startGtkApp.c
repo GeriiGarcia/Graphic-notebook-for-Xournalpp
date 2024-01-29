@@ -188,6 +188,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 css_add(css);
                 box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
 
+                system("rm /home/gerard/.libretaXournal/previewXournal.xml");
+
             }
 
                     

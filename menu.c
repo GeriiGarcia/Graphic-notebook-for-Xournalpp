@@ -1,4 +1,5 @@
 #include "includes.h"
+#include <math.h>
 
 void ponerOpcionesACero()
 {
@@ -217,7 +218,7 @@ void encontrarHijos(GtkWidget *widget, gpointer data) {
         long long tamanoEnBytes = calcularTamanoCarpeta(rutaCarpeta);
         double tamanoEnMB = (double)tamanoEnBytes / (1024 * 1024);
         char cadena[2048];
-        sprintf(cadena, "Vaciar Caché: %f", tamanoEnMB);
+        sprintf(cadena, "Vaciar Caché: %.2f MB", round(tamanoEnMB * 100.0) / 100.);
         gtk_menu_item_set_label(GTK_MENU_ITEM(widget), cadena);
     }
 }
