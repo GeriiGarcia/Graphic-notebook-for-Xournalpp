@@ -39,7 +39,10 @@ GtkWidget *get_widget_by_name(GtkContainer *container, const gchar *name) {
     return NULL;
 }
 
-
+/***
+ * @brief que al hacer click en enter se ejecute runOk 
+ * Que al hacer click en f5 se actualize el directorio
+*/
 gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
     UserData *button_data = (UserData *)user_data;
@@ -292,6 +295,14 @@ void refrescarDirectori(GtkWidget *widget, gpointer data)
 
 }
 
+void passTo(GtkWidget *widget, gpointer data)
+{
+    if(data)
+        system("passTo UNI &");
+    else
+        system("passTo &");
+}
+
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -370,10 +381,10 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     g_signal_connect(G_OBJECT(item3), "activate", G_CALLBACK(recargarTamaño), "Item 3");
 
     section3_1 = gtk_menu_item_new_with_label("passTo");
-    g_signal_connect(G_OBJECT(section3_1), "activate", G_CALLBACK(on_menu_item_activate), "Sección 3.1");
+    g_signal_connect(G_OBJECT(section3_1), "activate", G_CALLBACK(passTo), NULL);
 
     section3_2 = gtk_menu_item_new_with_label("passTo UNI");
-    g_signal_connect(G_OBJECT(section3_2), "activate", G_CALLBACK(on_menu_item_activate), "Sección 3.2");
+    g_signal_connect(G_OBJECT(section3_2), "activate", G_CALLBACK(passTo), "UNI");
 
     const char *rutaCarpeta = "/home/gerard/.libretaXournal";
     long long tamanoEnBytes = calcularTamanoCarpeta(rutaCarpeta);
