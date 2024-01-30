@@ -385,6 +385,27 @@ void volverAInicio(GtkWidget *widget, gpointer data)
     gtk_widget_show_all(box);
     
 }
+
+void mostrar_pdf(GtkWidget *widget, gpointer data)
+{
+    if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))
+        mostrarPdf = 1;
+    else
+        mostrarPdf = 0;
+
+    refrescarDirectori(widget, data);
+}
+
+void mostrar_previsualizaciones(GtkWidget *widget, gpointer data)
+{
+    if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)))
+        mostrarPrevisualizaciones = 1;
+    else
+        mostrarPrevisualizaciones = 0;
+    
+    refrescarDirectori(widget, data);
+}
+
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -433,8 +454,10 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     item2 = gtk_menu_item_new_with_label("Navegación");
     gtk_widget_set_name(item2, "item2");
 
-    section2_1 = gtk_menu_item_new_with_label("Mostrar PDFs?");
-    section2_2 = gtk_menu_item_new_with_label("Mostrar previsializaciones?");
+    section2_1 =  gtk_check_menu_item_new_with_label("Mostrar PDFs?");
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_1), TRUE);
+    section2_2 =  gtk_check_menu_item_new_with_label("Mostrar previsializaciones?");
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_2), TRUE);
     GtkWidget *section2_3 = gtk_menu_item_new_with_label("Cambiar ruta predeterminada");
 
     GtkWidget *section2_4 = gtk_menu_item_new_with_label("Ordenar");
@@ -448,8 +471,8 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\tF5");
     GtkWidget *section2_6 = gtk_menu_item_new_with_label("Volver a inicio");
 
-    g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(on_menu_item_activate), NULL);
-    g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(mostrar_pdf), data);
+    g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(mostrar_previsualizaciones), data);
     g_signal_connect(G_OBJECT(section2_3), "activate", G_CALLBACK(cambiarRutaPredeterminada), data);
     g_signal_connect(G_OBJECT(section2_4_1), "activate", G_CALLBACK(ordenarXopp), data);
     g_signal_connect(G_OBJECT(section2_4_2), "activate", G_CALLBACK(ordenarPdf), data);

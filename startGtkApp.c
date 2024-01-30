@@ -11,6 +11,8 @@ char *css =
     ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
 int opcionesMenu[20];
 int ordenarArchivos = 0;
+int mostrarPrevisualizaciones = 1;
+int mostrarPdf = 1;
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
  * 
@@ -165,7 +167,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 printf("%s\n", dir->d_name);
 
                 //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
-                if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || !strcmp(obtenerExtension(dir->d_name), ".pdf")) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+                if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || (!strcmp(obtenerExtension(dir->d_name), ".pdf")) && mostrarPdf == 1) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                 {
                     archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
                     archivosDirectorios[n][0] = '\0';
@@ -207,43 +209,56 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             }
             else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf")) // si es pdf
             {
-                char auxPdf[1024] = "";
-                char auxPrev[1024] = "";
+                if(mostrarPrevisualizaciones == 1)
+                {
+                    char auxPdf[1024] = "";
+                    char auxPrev[1024] = "";
 
-                strcat(auxPdf, cwd);
-                strcat(auxPdf, "/");
-                strcat(auxPdf, archivosDirectorios[k]);
+                    strcat(auxPdf, cwd);
+                    strcat(auxPdf, "/");
+                    strcat(auxPdf, archivosDirectorios[k]);
 
-                strcat(auxPrev, guardarPrevisualizaciones);
-                strcat(auxPrev, archivosDirectorios[k]);
-                strcat(auxPrev, ".png");
+                    strcat(auxPrev, guardarPrevisualizaciones);
+                    strcat(auxPrev, archivosDirectorios[k]);
+                    strcat(auxPrev, ".png");
 
-                pdf_to_image(auxPdf, auxPrev);
+                    pdf_to_image(auxPdf, auxPrev);
+                    css_add(css);
+                    box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
+                }
+                else if(mostrarPrevisualizaciones == 0)
+                {
 
-                css_add(css);
-                box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
+                }
+                
 
             }
             else // si es xopp
             {
+                if(mostrarPrevisualizaciones == 1)
+                {
+                    char auxXopp[1024] = "";
+                    char auxPrev[1024] = "";
+    
+                    strcat(auxXopp, cwd);
+                    strcat(auxXopp, "/");
+                    strcat(auxXopp, archivosDirectorios[k]);
+    
+                    strcat(auxPrev, guardarPrevisualizaciones);
+                    strcat(auxPrev, archivosDirectorios[k]);
+                    strcat(auxPrev, ".png");
+    
+                    base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
+    
+                    css_add(css);
+                    box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
+    
+                    system("rm /home/gerard/.libretaXournal/previewXournal.xml");
+                }
+                else if(mostrarPrevisualizaciones == 0)
+                {
 
-                char auxXopp[1024] = "";
-                char auxPrev[1024] = "";
-
-                strcat(auxXopp, cwd);
-                strcat(auxXopp, "/");
-                strcat(auxXopp, archivosDirectorios[k]);
-
-                strcat(auxPrev, guardarPrevisualizaciones);
-                strcat(auxPrev, archivosDirectorios[k]);
-                strcat(auxPrev, ".png");
-
-                base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
-
-                css_add(css);
-                box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
-
-                system("rm /home/gerard/.libretaXournal/previewXournal.xml");
+                }
 
             }
 

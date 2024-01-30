@@ -40,7 +40,7 @@ extern char *css;
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
  * @param opciones[1] Vaciar Caché
- * @param cambiarRutaPredeterminada[2] cambiar ruta predeterminada
+ * @param opciones[2] cambiar ruta predeterminada
 */
 extern int opcionesMenu[20];
 
@@ -49,6 +49,19 @@ extern int opcionesMenu[20];
  * @param 1 PDF primero
 */ 
 extern int ordenarArchivos;
+
+
+/***
+ * @param 0 no 
+ * @param 1 si
+*/ 
+extern int mostrarPdf;
+
+/***
+ * @param 0 no 
+ * @param 1 si
+*/ 
+extern int mostrarPrevisualizaciones;
 
 typedef struct {
     char some_value[1024];
