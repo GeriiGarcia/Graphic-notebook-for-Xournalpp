@@ -77,6 +77,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         refrescarDirectori(widget, refrescar);
         return;
     }
+
     // en cas que haigi fet click a un .pdf o un .xopp, s'obrira el xournalpp
     if(strcmp(gtk_widget_get_name(widget), "pdf") == 0 || strcmp(gtk_widget_get_name(widget), "xournal") == 0)
     {
@@ -86,6 +87,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         strcat(comando, "/");
         strcat(comando, button_data->some_value);
         strcat(xournal, agregarBarras(comando));
+        printf("COMANDO: %s\n", xournal);
         system(strcat(xournal, " &")); //para que se vaya al background
     }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
@@ -187,10 +189,28 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         for (int k = 0; k < n; k++) //mostrare els artxius un cop ordenats
         {
             
-            if(!strcmp(obtenerExtension(archivosDirectorios[k]), "Sin extensión")) // si es un directorio
+            if(!strcmp(obtenerExtension(archivosDirectorios[k]), "Sin extensión") || mostrarPrevisualizaciones == 0) // si es un directorio
             {
                 //posar widgets al box   
                 GtkWidget *normalButton = gtk_button_new_with_label(archivosDirectorios[k]);
+
+                if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".xopp"))
+                {
+                    css_add(css);
+                    gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border");
+                    gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border_margin");
+                    gtk_widget_set_name(normalButton, "xournal");
+                } 
+                else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf"))
+                {
+                    css_add(css);
+                    gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border");
+                    gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border_margin_pdf");
+                    gtk_widget_set_name(normalButton, "pdf");
+                }
+
+                
+
                 gtk_widget_set_margin_start(normalButton, MARGIN);
                 gtk_widget_set_margin_end(normalButton, MARGIN);
                 gtk_widget_set_margin_top(normalButton, MARGIN);
@@ -200,12 +220,13 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
                 gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
 
-                UserData *userdata = g_new(UserData, 1);
-                strncpy(button_data->some_value, archivosDirectorios[k], sizeof(button_data->some_value) - 1);
-                button_data->some_value[sizeof(button_data->some_value) - 1] = '\0';
 
-                userdata->box = button_data->box;
-                g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+                UserData *userdataNew = g_new(UserData, 1);
+                strncpy(userdataNew->some_value, archivosDirectorios[k], sizeof(userdataNew->some_value) - 1);
+                userdataNew->some_value[sizeof(userdataNew->some_value) - 1] = '\0';
+                userdataNew->box = button_data->box;
+
+                g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdataNew);
             }
             else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf")) // si es pdf
             {
@@ -225,10 +246,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                     pdf_to_image(auxPdf, auxPrev);
                     css_add(css);
                     box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
-                }
-                else if(mostrarPrevisualizaciones == 0)
-                {
-
                 }
                 
 
@@ -254,10 +271,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                     box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
     
                     system("rm /home/gerard/.libretaXournal/previewXournal.xml");
-                }
-                else if(mostrarPrevisualizaciones == 0)
-                {
-
                 }
 
             }
