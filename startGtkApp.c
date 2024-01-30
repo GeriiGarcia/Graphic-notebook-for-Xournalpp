@@ -254,51 +254,49 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 userdataNew->box = button_data->box;
 
                 g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdataNew);
+                g_signal_connect(normalButton, "button-press-event", G_CALLBACK(on_button_right_click), userdataNew);
             }
             else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf")) // si es pdf
             {
-                if(mostrarPrevisualizaciones == 1)
-                {
-                    char auxPdf[1024] = "";
-                    char auxPrev[1024] = "";
+                
+                char auxPdf[1024] = "";
+                char auxPrev[1024] = "";
 
-                    strcat(auxPdf, cwd);
-                    strcat(auxPdf, "/");
-                    strcat(auxPdf, archivosDirectorios[k]);
+                strcat(auxPdf, cwd);
+                strcat(auxPdf, "/");
+                strcat(auxPdf, archivosDirectorios[k]);
 
-                    strcat(auxPrev, guardarPrevisualizaciones);
-                    strcat(auxPrev, archivosDirectorios[k]);
-                    strcat(auxPrev, ".png");
+                strcat(auxPrev, guardarPrevisualizaciones);
+                strcat(auxPrev, archivosDirectorios[k]);
+                strcat(auxPrev, ".png");
 
-                    pdf_to_image(auxPdf, auxPrev);
-                    css_add(css);
-                    box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
-                }
+                pdf_to_image(auxPdf, auxPrev);
+                css_add(css);
+                box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
                 
 
             }
             else // si es xopp
             {
-                if(mostrarPrevisualizaciones == 1)
-                {
-                    char auxXopp[1024] = "";
-                    char auxPrev[1024] = "";
+
+                char auxXopp[1024] = "";
+                char auxPrev[1024] = "";
     
-                    strcat(auxXopp, cwd);
-                    strcat(auxXopp, "/");
-                    strcat(auxXopp, archivosDirectorios[k]);
+                strcat(auxXopp, cwd);
+                strcat(auxXopp, "/");
+                strcat(auxXopp, archivosDirectorios[k]);
     
-                    strcat(auxPrev, guardarPrevisualizaciones);
-                    strcat(auxPrev, archivosDirectorios[k]);
-                    strcat(auxPrev, ".png");
+                strcat(auxPrev, guardarPrevisualizaciones);
+                strcat(auxPrev, archivosDirectorios[k]);
+                strcat(auxPrev, ".png");
     
-                    base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
+                base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
     
-                    css_add(css);
-                    box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
+                css_add(css);
+                box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
     
-                    system("rm /home/gerard/.libretaXournal/previewXournal.xml");
-                }
+                system("rm /home/gerard/.libretaXournal/previewXournal.xml");
+                
 
             }
 

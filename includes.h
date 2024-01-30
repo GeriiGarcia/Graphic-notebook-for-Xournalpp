@@ -89,5 +89,6 @@ void ponerOpcionesACero();
 char *cambiarExtension(const char *, const char *);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 int directorio_existe(const char *);
+gboolean on_button_right_click(GtkWidget *, GdkEventButton *, gpointer );
 
 #endif // INCLUDES_H

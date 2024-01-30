@@ -8,6 +8,107 @@ GtkWidget *create_file_button(const char *, gpointer , char *);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 void ponerOpcionesACero();
 
+void suprimir(GtkWidget *widget, gpointer user_data)
+{
+    UserData *button_data = (UserData *)user_data;
+
+    char aux[1024] = "";
+    strcat(aux, agregarBarras(cwd));
+    strcat(aux, "/");
+    strcat(aux, agregarBarras(button_data->some_value));
+    char comando[1024] = "rm -rf ";
+    strcat(comando, aux);
+
+    system(comando);
+
+    refrescarDirectori(widget, user_data);
+}
+
+void exportarAPdf(GtkWidget *widget, gpointer user_data)
+{
+    UserData *button_data = (UserData *)user_data;
+    //exportar
+    char pathArchivoXopp[2048] = "";
+    strcat(pathArchivoXopp, agregarBarras(cwd));
+    strcat(pathArchivoXopp, "/");
+    strcat(pathArchivoXopp, button_data->some_value);
+
+    char pathArchivoPdf[2048] = "";
+    strcat(pathArchivoPdf, agregarBarras(cwd));
+    strcat(pathArchivoPdf, "/");
+    char *nombreArchivoModificado = cambiarExtension(button_data->some_value, ".pdf");
+    strcat(pathArchivoPdf, nombreArchivoModificado);
+    
+    char comando[8000] = "xournalpp --export-no-ruling --create-pdf=";
+    strcat(comando, pathArchivoPdf);
+    strcat(comando, " ");
+    strcat(comando, pathArchivoXopp);
+    strcat(comando, "");
+
+    system(comando);
+
+    free(nombreArchivoModificado);
+
+    refrescarDirectori(widget, user_data);
+}
+
+void abrirPdf(GtkWidget *widget, gpointer user_data)
+{
+    UserData *button_data = (UserData *)user_data;
+    char aux[2048] = "";
+    strcat(aux, agregarBarras(cwd));
+    strcat(aux, "/");
+    strcat(aux, button_data->some_value);
+
+    char comando[2048] = "open ";
+    strcat(comando, aux);
+    strcat(comando, " &");
+
+    system(comando);
+    
+}
+
+gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+    UserData *button_data = (UserData *)user_data;
+
+    if (event->button == 3) 
+    { // Botón derecho del ratón
+        GtkWidget *menu = gtk_menu_new();
+
+        GtkWidget *opcion1 = gtk_menu_item_new_with_label("Suprimir");
+        g_signal_connect(opcion1, "activate", G_CALLBACK(suprimir), user_data);
+        gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion1);
+
+        if(!strcmp(obtenerExtension(button_data->some_value), ".xopp"))
+        {
+            GtkWidget *opcion2 = gtk_menu_item_new_with_label("Exportar a PDF");
+            g_signal_connect(opcion2, "activate", G_CALLBACK(exportarAPdf), user_data);
+            gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion2);
+        }
+        else if(!strcmp(obtenerExtension(button_data->some_value), ".pdf"))
+        {
+            GtkWidget *opcion2 = gtk_menu_item_new_with_label("Abrir con visor de PDF");
+            g_signal_connect(opcion2, "activate", G_CALLBACK(abrirPdf), user_data);
+            gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion2);
+        }
+        else if(!strcmp(obtenerExtension(button_data->some_value), "Sin extensión"))
+        {
+            
+            
+        }
+
+        
+
+        gtk_widget_show_all(menu);
+
+        // Mostrar el menú
+        gtk_menu_popup_at_pointer(GTK_MENU(menu), (GdkEvent *)event);
+    }
+    else
+        return FALSE;
+}
+
 /***
  * @brief sirve para añadir un pdf o xopp a la grid, teniendo en cuenta que cada uno tiene un marco diferente
  * 
@@ -149,6 +250,7 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name)
     g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), userdataNew);
     g_signal_connect(button, "enter-notify-event", G_CALLBACK(on_button_hover), userdataNew);
     g_signal_connect(button, "leave-notify-event", G_CALLBACK(on_button_unhover), userdataNew);
+    g_signal_connect(button, "button-press-event", G_CALLBACK(on_button_right_click), userdataNew);
 
     return box;
 }
@@ -175,5 +277,5 @@ void abrirXournal(GtkWidget *widget, gpointer data)
 
     ponerOpcionesACero();
     opcionesMenu[NUEVO_XOURNAL] = 1;
-    
+
 }

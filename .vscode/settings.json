@@ -69,6 +69,9 @@
     "random": "c",
     "optional": "c",
     "string.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "array": "c",
+    "string": "c",
+    "string_view": "c"
   }
 }
