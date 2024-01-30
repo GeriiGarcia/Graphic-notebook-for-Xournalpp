@@ -13,6 +13,33 @@ int opcionesMenu[20];
 int ordenarArchivos = 0;
 int mostrarPrevisualizaciones = 1;
 int mostrarPdf = 1;
+
+
+void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, int x, int y, GtkSelectionData *sel_data, guint info, guint time, gpointer data) {
+    gchar **uris = gtk_selection_data_get_uris(sel_data);
+    for (int i = 0; uris[i] != NULL; i++) {
+        gchar *path = g_filename_from_uri(uris[i], NULL, NULL);
+        g_print("Nombre del archivo: %s\n", path);
+        char aux[2048] = "";
+
+        strcat(aux, agregarBarras(path));
+        strcat(aux, " ");
+        strcat(aux, agregarBarras(cwd));
+
+        char cp[2056] = "cp -r ";
+        strcat(cp, aux);
+        system(cp);
+
+        g_free(path);
+
+        //refrescar
+
+        refrescarDirectori(widget, data);
+    }
+    g_strfreev(uris);
+}
+
+
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
  * 
@@ -388,6 +415,9 @@ static void activate (GtkApplication *app, gpointer user_data){
     gtk_container_add(GTK_CONTAINER(main), containerPath);
     //gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
 
+    gtk_drag_dest_set(window, GTK_DEST_DEFAULT_ALL, NULL, 0, GDK_ACTION_COPY);
+    gtk_drag_dest_add_uri_targets(window);
+    g_signal_connect(window, "drag-data-received", G_CALLBACK(on_drag_data_received), userdata);
     
     g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(on_key_press), userdata);
     gtk_widget_show_all(window);
