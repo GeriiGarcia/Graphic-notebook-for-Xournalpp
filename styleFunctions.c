@@ -128,31 +128,34 @@ int compararArchivos(const void *a, const void *b) {
         return 1;
     }
 
-    /* si quiero listar los pdf antes que los xopp
+    // si quiero listar los pdf antes que los xopp
     // Comparar extensiones .xopp
-    int comparacion = strcmp(extensionA, extensionB);
-    if (comparacion != 0) {
-        return comparacion;
-    }
+    if(ordenarArchivos == 1)
+    {
+        int comparacion = strcmp(extensionA, extensionB);
+        if (comparacion != 0) {
+            return comparacion;
+        }
 
-    return strcmp(nombreA, nombreB);
-    */
-    
-    // Comparar extensiones .xopp primero
-    if (strcmp(extensionA, ".xopp") == 0 && strcmp(extensionB, ".xopp") != 0) {
-        return -1;
-    } else if (strcmp(extensionA, ".xopp") != 0 && strcmp(extensionB, ".xopp") == 0) {
-        return 1;
-    }
+        return strcmp(nombreA, nombreB);
+        }
+    else if(ordenarArchivos == 0)
+    {
+        // Comparar extensiones .xopp primero
+        if (strcmp(extensionA, ".xopp") == 0 && strcmp(extensionB, ".xopp") != 0) {
+            return -1;
+        } else if (strcmp(extensionA, ".xopp") != 0 && strcmp(extensionB, ".xopp") == 0) {
+            return 1;
+        }
 
-    // Comparar extensiones .pdf
-    int comparacion = strcmp(extensionA, extensionB);
-    if (comparacion != 0) {
-        return comparacion;
+        // Comparar extensiones .pdf
+        int comparacion = strcmp(extensionA, extensionB);
+        if (comparacion != 0) {
+            return comparacion;
+        }
     }
 
     // Comparar nombres
-    
     return strcmp(nombreA, nombreB);
 }
 

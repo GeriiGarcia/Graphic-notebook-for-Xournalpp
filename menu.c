@@ -319,6 +319,18 @@ void exportarPdf(GtkWidget *widget, gpointer data)
     opcionesMenu[EXPORTAR_PDF] = 1;
 }
 
+void ordenarXopp(GtkWidget *widget, gpointer data)
+{
+    ordenarArchivos = 0;
+    refrescarDirectori(widget, data);
+}
+
+void ordenarPdf(GtkWidget *widget, gpointer data)
+{
+    ordenarArchivos = 1;
+    refrescarDirectori(widget, data);
+}
+
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -370,14 +382,23 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     section2_1 = gtk_menu_item_new_with_label("Mostrar PDFs?");
     section2_2 = gtk_menu_item_new_with_label("Mostrar previsializaciones?");
     GtkWidget *section2_3 = gtk_menu_item_new_with_label("Cambiar ruta predeterminada");
-    GtkWidget *section2_4 = gtk_menu_item_new_with_label("Tipo de orden");
-    GtkWidget *section2_5 = gtk_menu_item_new_with_label("Refrescar directorio f5");
+
+    GtkWidget *section2_4 = gtk_menu_item_new_with_label("Ordenar");
+    GtkWidget *section2_4_0 = gtk_menu_new();
+    GSList *group = NULL;
+    // Crear las opciones como elementos de menú de radio
+    GtkWidget *section2_4_1 = gtk_radio_menu_item_new_with_label(group, "Xopp primero");
+    group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
+    GtkWidget *section2_4_2 = gtk_radio_menu_item_new_with_label(group, "Pdf primero");
+
+    GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\tF5");
     GtkWidget *section2_6 = gtk_menu_item_new_with_label("Volver a inicio");
 
     g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(on_menu_item_activate), NULL);
     g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(on_menu_item_activate), NULL);
     g_signal_connect(G_OBJECT(section2_3), "activate", G_CALLBACK(on_menu_item_activate), NULL);
-    g_signal_connect(G_OBJECT(section2_4), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_4_1), "activate", G_CALLBACK(ordenarXopp), data);
+    g_signal_connect(G_OBJECT(section2_4_2), "activate", G_CALLBACK(ordenarPdf), data);
     g_signal_connect(G_OBJECT(section2_5), "activate", G_CALLBACK(refrescarDirectori), data);
     g_signal_connect(G_OBJECT(section2_6), "activate", G_CALLBACK(on_menu_item_activate), NULL);
     
@@ -385,8 +406,11 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_2);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_3);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_4);
+    gtk_menu_shell_append(GTK_MENU_SHELL(section2_4_0), section2_4_1);
+    gtk_menu_shell_append(GTK_MENU_SHELL(section2_4_0), section2_4_2);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_5);
 
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(section2_4), section2_4_0);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item2), menu2);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), item2);
 

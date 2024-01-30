@@ -42,6 +42,12 @@ extern char *css;
 */
 extern int opcionesMenu[20];
 
+/***
+ * @param 0 xournals primero 
+ * @param 1 PDF primero
+*/ 
+extern int ordenarArchivos;
+
 typedef struct {
     char some_value[1024];
     GtkWidget *box;

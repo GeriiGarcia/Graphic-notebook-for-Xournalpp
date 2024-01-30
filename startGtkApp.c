@@ -8,6 +8,7 @@ char *css =
     ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; }\n"
     ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
 int opcionesMenu[20];
+int ordenarArchivos = 0;
 /**
  * @brief funcio que s'executa al fer click en button1. Crea i afegeix un boto en el box passat depenent dels archius que hi ha a la carpeta
  * 
@@ -34,12 +35,11 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             strcat(pathArchivoXopp, "/");
             strcat(pathArchivoXopp, button_data->some_value);
 
-            printf("pathArchivoXopp: %s\n", pathArchivoXopp);
-
             char pathArchivoPdf[2048] = "";
             strcat(pathArchivoPdf, agregarBarras(cwd));
             strcat(pathArchivoPdf, "/");
-            strcat(pathArchivoPdf, cambiarExtension(button_data->some_value, ".pdf"));
+            char *nombreArchivoModificado = cambiarExtension(button_data->some_value, ".pdf");
+            strcat(pathArchivoPdf, nombreArchivoModificado);
             
             char comando[8000] = "xournalpp --export-no-ruling --create-pdf=";
             strcat(comando, pathArchivoPdf);
@@ -48,6 +48,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             strcat(comando, "");
 
             system(comando);
+
+            free(nombreArchivoModificado);
 
             box = gtk_widget_get_parent(widget);
             box = gtk_widget_get_parent(box);
@@ -61,7 +63,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             //cambiar nombre del texto y poner exportado
             //gtk_entry_set_text(GTK_ENTRY(box), "Exportado");
             
-            
         }
 
         gtk_widget_hide(box);       
@@ -69,7 +70,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         //refrescar directorio
         UserData *refrescar = g_new(UserData, 1);
         refrescar->box = main;
-        printf("refrescar: %s\n", gtk_widget_get_name(refrescar->box));
         refrescarDirectori(widget, refrescar);
         return;
     }
