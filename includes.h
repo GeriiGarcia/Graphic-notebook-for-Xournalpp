@@ -34,6 +34,7 @@ extern char *css;
 #define NUEVA_CARPETA 0
 #define NUEVO_XOURNAL 19
 #define VACIAR_CACHE 1
+#define EXPORTAR_PDF 2
 /***
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
@@ -63,5 +64,8 @@ void box_add(GtkWidget *, char *, const char * , gpointer , char * , int , int ,
 void runOk(GtkWidget *, gpointer ); 
 gboolean on_key_press(GtkWidget *, GdkEventKey *, gpointer );
 void refrescarDirectori(GtkWidget *, gpointer );
+void ponerOpcionesACero();
+char *cambiarExtension(const char *, const char *);
+GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 
 #endif // INCLUDES_H

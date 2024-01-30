@@ -17,7 +17,62 @@ int opcionesMenu[20];
 void on_button_clicked(GtkWidget *widget, gpointer data) {
 
     UserData *button_data = (UserData *)data;
-    
+
+    GtkWidget *box = NULL;
+    GtkWidget *main;
+    //en caso que se le haya dado a exportar
+    if(opcionesMenu[EXPORTAR_PDF] == 1)
+    {
+        ponerOpcionesACero();
+        printf("Exportar: %s\n", button_data->some_value);
+
+        if(strcmp(obtenerExtension(button_data->some_value), "xopp"))
+        {
+            //exportar
+            char pathArchivoXopp[2048] = "";
+            strcat(pathArchivoXopp, agregarBarras(cwd));
+            strcat(pathArchivoXopp, "/");
+            strcat(pathArchivoXopp, button_data->some_value);
+
+            printf("pathArchivoXopp: %s\n", pathArchivoXopp);
+
+            char pathArchivoPdf[2048] = "";
+            strcat(pathArchivoPdf, agregarBarras(cwd));
+            strcat(pathArchivoPdf, "/");
+            strcat(pathArchivoPdf, cambiarExtension(button_data->some_value, ".pdf"));
+            
+            char comando[8000] = "xournalpp --export-no-ruling --create-pdf=";
+            strcat(comando, pathArchivoPdf);
+            strcat(comando, " ");
+            strcat(comando, pathArchivoXopp);
+            strcat(comando, "");
+
+            system(comando);
+
+            box = gtk_widget_get_parent(widget);
+            box = gtk_widget_get_parent(box);
+            box = gtk_widget_get_parent(box);
+            
+            box = gtk_widget_get_parent(box);
+            main = box;
+            box = gtk_widget_get_parent(box);
+            box = get_widget_by_name(GTK_CONTAINER(box), "textOption");
+            
+            //cambiar nombre del texto y poner exportado
+            //gtk_entry_set_text(GTK_ENTRY(box), "Exportado");
+            
+            
+        }
+
+        gtk_widget_hide(box);       
+
+        //refrescar directorio
+        UserData *refrescar = g_new(UserData, 1);
+        refrescar->box = main;
+        printf("refrescar: %s\n", gtk_widget_get_name(refrescar->box));
+        refrescarDirectori(widget, refrescar);
+        return;
+    }
     // en cas que haigi fet click a un .pdf o un .xopp, s'obrira el xournalpp
     if(strcmp(gtk_widget_get_name(widget), "pdf") == 0 || strcmp(gtk_widget_get_name(widget), "xournal") == 0)
     {

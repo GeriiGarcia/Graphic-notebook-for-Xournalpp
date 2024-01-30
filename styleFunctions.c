@@ -26,6 +26,24 @@ void quitarDesdeUltimaBarra(char *cadena) {
     }
 }
 
+char *cambiarExtension(const char *nombreArchivo, const char *nuevaExtension) {
+    char *resultado = malloc(strlen(nombreArchivo) + strlen(nuevaExtension) + 1);
+
+    if (resultado != NULL) {
+        strcpy(resultado, nombreArchivo);
+
+        char *punto = strrchr(resultado, '.');
+
+        if (punto != NULL && punto != resultado) {
+            // Se encontró un punto y no es el primer carácter
+            *punto = '\0';  // Elimina la extensión actual
+            strcat(resultado, nuevaExtension);  // Agrega la nueva extensión
+        }
+    }
+
+    return resultado;
+}
+
 const char *obtenerExtension(const char *nombreArchivo) {
     const char *punto = strrchr(nombreArchivo, '.');
     // Verificar si se encontró un punto y si no es el último carácter
@@ -37,6 +55,7 @@ const char *obtenerExtension(const char *nombreArchivo) {
     }
 }
 
+//para cuando necesito añadir contrabarras
 char* agregarBarras(char *cadena) {
     int longitud = strlen(cadena);
 

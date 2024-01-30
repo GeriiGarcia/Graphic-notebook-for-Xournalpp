@@ -303,6 +303,22 @@ void passTo(GtkWidget *widget, gpointer data)
         system("passTo &");
 }
 
+void exportarPdf(GtkWidget *widget, gpointer data)
+{
+    UserData *button_data = (UserData *)data;
+    gchar *texto = "textOption";
+    GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+    texto = "buttonOk";
+    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+
+    gtk_widget_show(textWidget);
+    //gtk_widget_show(buttonOk);
+    gtk_entry_set_text(GTK_ENTRY(textWidget), "Pulsa un archivo");
+
+    ponerOpcionesACero();
+    opcionesMenu[EXPORTAR_PDF] = 1;
+}
+
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -333,7 +349,7 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     g_signal_connect(G_OBJECT(section1_1), "activate", G_CALLBACK(nuevaCarpeta), data);
 
     section1_2 = gtk_menu_item_new_with_label("Exportar a PDF");
-    g_signal_connect(G_OBJECT(section1_2), "activate", G_CALLBACK(on_menu_item_activate), "Exportar a PDF");
+    g_signal_connect(G_OBJECT(section1_2), "activate", G_CALLBACK(exportarPdf), data);
 
     GtkWidget *section1_3 = gtk_menu_item_new_with_label("Reset");
     g_signal_connect(G_OBJECT(section1_3), "activate", G_CALLBACK(reset), data);
