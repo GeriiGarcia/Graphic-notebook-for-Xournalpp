@@ -190,6 +190,13 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 system(xournalpp);
             }
             break;
+
+        case CAMBIAR_RUTA_PREDETERMINADA:
+
+            if(directorio_existe(widget_value) == 1)
+                strcpy(rutaPredeterminada, widget_value);
+            
+            break;
         default:
             break;
         }
@@ -331,6 +338,53 @@ void ordenarPdf(GtkWidget *widget, gpointer data)
     refrescarDirectori(widget, data);
 }
 
+void cambiarRutaPredeterminada(GtkWidget *widget, gpointer data)
+{
+    UserData *button_data = (UserData *)data;
+    gchar *texto = "textOption";
+    GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+    texto = "buttonOk";
+    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+
+    gtk_widget_show(textWidget);
+    gtk_widget_show(buttonOk);
+    gtk_entry_set_text(GTK_ENTRY(textWidget), rutaPredeterminada);
+
+
+    ponerOpcionesACero();
+    opcionesMenu[CAMBIAR_RUTA_PREDETERMINADA] = 1;
+
+}
+
+void volverAInicio(GtkWidget *widget, gpointer data)
+{
+    strcpy(cwd, rutaPredeterminada);
+    chdir(rutaPredeterminada);
+    refrescarDirectori(widget, data);
+
+    UserData *button_data = (UserData *)data;
+    GtkWidget *box = gtk_widget_get_parent(button_data->box);
+    
+    box = get_widget_by_name(GTK_CONTAINER(box), "files");
+
+    GList *children2, *iter2;
+    children2 = gtk_container_get_children(GTK_CONTAINER(box));
+    for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+        gtk_widget_destroy(GTK_WIDGET(iter2->data));
+
+    GtkWidget *auxButton = gtk_button_new_with_label("Predeterminado");
+    gtk_grid_attach(GTK_GRID(box), auxButton, 0, 0, 50, 50);
+
+    UserData *userdata = g_new(UserData, 1);
+    strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
+    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+    userdata->box = box;
+    g_signal_connect(auxButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+
+    
+    gtk_widget_show_all(box);
+    
+}
 // Función que maneja la selección de los elementos del menú
 void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
     g_print("Se seleccionó: %s\n", (const char *)data);
@@ -396,11 +450,11 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
 
     g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(on_menu_item_activate), NULL);
     g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(on_menu_item_activate), NULL);
-    g_signal_connect(G_OBJECT(section2_3), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_3), "activate", G_CALLBACK(cambiarRutaPredeterminada), data);
     g_signal_connect(G_OBJECT(section2_4_1), "activate", G_CALLBACK(ordenarXopp), data);
     g_signal_connect(G_OBJECT(section2_4_2), "activate", G_CALLBACK(ordenarPdf), data);
     g_signal_connect(G_OBJECT(section2_5), "activate", G_CALLBACK(refrescarDirectori), data);
-    g_signal_connect(G_OBJECT(section2_6), "activate", G_CALLBACK(on_menu_item_activate), NULL);
+    g_signal_connect(G_OBJECT(section2_6), "activate", G_CALLBACK(volverAInicio), data);
     
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_1);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_2);
@@ -409,6 +463,7 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     gtk_menu_shell_append(GTK_MENU_SHELL(section2_4_0), section2_4_1);
     gtk_menu_shell_append(GTK_MENU_SHELL(section2_4_0), section2_4_2);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_5);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu2), section2_6);
 
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(section2_4), section2_4_0);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item2), menu2);

@@ -1,4 +1,7 @@
 #include "includes.h"
+#include <X11/Xw32defs.h>
+#include <fcntl.h>
+#include "../../../../../usr/include/i386-linux-gnu/sys/stat.h"
 
 
 /***
@@ -159,3 +162,15 @@ int compararArchivos(const void *a, const void *b) {
     return strcmp(nombreA, nombreB);
 }
 
+
+int directorio_existe(const char *ruta) {
+    DIR* dir = opendir(ruta);
+    if (dir) {
+        // El directorio existe
+        closedir(dir);
+        return 1;
+    } else {
+        // El directorio no existe
+        return 0;
+    }
+}

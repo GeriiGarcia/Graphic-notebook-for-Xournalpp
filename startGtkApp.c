@@ -1,5 +1,7 @@
 #include "includes.h"
+#include <string.h>
 
+char rutaPredeterminada[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/";
 char directorioMas[1024] = "/home/gerard/Gerard/Projects/libreriaGrafica/IMG/plus_icon.png";
@@ -86,62 +88,60 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
     {
-        
-        // si no he pulsat button1, cambiar de directori al que marqui cwd
-        if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado"))
+
+        if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
+            quitarDesdeUltimaBarra(cwd);
+        else if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado")) // si no li he fet click a Predeterminado
         {
-            if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
-                quitarDesdeUltimaBarra(cwd);
-            else
-            {
-                strcat(cwd,"/");
-                chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
-                printf("%s\n",cwd);
-            }
-
-            //agafo el pare del widget i canvio el text del directori actual
-            GtkWidget *parent = gtk_widget_get_parent(button_data->box);
-            parent = gtk_widget_get_parent(parent);
-            parent = gtk_widget_get_parent(parent);
-
-            GList *children, *iter;
-            children = gtk_container_get_children(GTK_CONTAINER(parent));
-            
-            for(iter = children; iter != NULL; iter = g_list_next(iter))
-            {
-                
-                if(strcmp(gtk_widget_get_name((iter->data)), "fijo") == 0)
-                {   
-
-                    GList *children2, *iter2;
-                    children2 = gtk_container_get_children(GTK_CONTAINER(iter->data));
-
-                    for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
-                    {
-                        if(GTK_IS_LABEL(iter2->data))
-                        {   
-                            char result[1000] = "<big><b> ";
-                            strcat(result, cwd);
-                            strcat(result, " </b></big>");
-                            gtk_label_set_markup(GTK_LABEL(iter2->data),result);
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-
-            g_list_free(children);
-
+            strcat(cwd,"/");
+            chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
+            printf("%s\n",cwd);
         }
 
-        // borro tots els fills del box de fitxers
+        //agafo el pare del widget i canvio el text del directori actual
+        GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+        parent = gtk_widget_get_parent(parent);
+        parent = gtk_widget_get_parent(parent);
+
         GList *children, *iter;
-        children = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+        children = gtk_container_get_children(GTK_CONTAINER(parent));
+        
         for(iter = children; iter != NULL; iter = g_list_next(iter))
-            gtk_widget_destroy(GTK_WIDGET(iter->data));
+        {
+            
+            if(strcmp(gtk_widget_get_name((iter->data)), "fijo") == 0)
+            {   
+
+                GList *children2, *iter2;
+                children2 = gtk_container_get_children(GTK_CONTAINER(iter->data));
+
+                for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+                {
+                    if(GTK_IS_LABEL(iter2->data))
+                    {   
+                        char result[1000] = "<big><b> ";
+                        strcat(result, cwd);
+                        strcat(result, " </b></big>");
+                        gtk_label_set_markup(GTK_LABEL(iter2->data),result);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
 
         g_list_free(children);
+
+        
+
+
+        // borro tots els fills del box de fitxers
+        GList *children2, *iter2;
+        children2 = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+        for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+            gtk_widget_destroy(GTK_WIDGET(iter2->data));
+
+        g_list_free(children2);
 
         //Llistar directoris
         g_print("Listando Directorios\n");
@@ -320,7 +320,7 @@ static void activate (GtkApplication *app, gpointer user_data){
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
     files = gtk_grid_new();  
     gtk_widget_set_name(files, "files");  
-    gtk_widget_set_name(window, "main");  
+    gtk_widget_set_name(main, "main");  
 
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);

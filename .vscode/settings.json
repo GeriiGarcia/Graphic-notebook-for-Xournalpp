@@ -67,6 +67,8 @@
     "bitset": "c",
     "memory": "c",
     "random": "c",
-    "optional": "c"
+    "optional": "c",
+    "string.h": "c",
+    "stdio.h": "c"
   }
 }

@@ -2,7 +2,7 @@
 #define INCLUDES_H
 
 #include <gtk/gtk.h>
-#include <string.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h> 
@@ -25,7 +25,7 @@
 #define MARGIN 10
 
 
-
+extern char rutaPredeterminada[10000];
 extern char cwd[10000];  // Definición de cwd
 extern char guardarPrevisualizaciones[1024];  // Definición de guardarPrevisualizaciones
 extern char directorioMas[1024];  // Definición de directorioMas
@@ -34,11 +34,13 @@ extern char *css;
 #define NUEVA_CARPETA 0
 #define NUEVO_XOURNAL 19
 #define VACIAR_CACHE 1
-#define EXPORTAR_PDF 2
+#define EXPORTAR_PDF 18
+#define CAMBIAR_RUTA_PREDETERMINADA 2
 /***
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
  * @param opciones[1] Vaciar Caché
+ * @param cambiarRutaPredeterminada[2] cambiar ruta predeterminada
 */
 extern int opcionesMenu[20];
 
@@ -73,5 +75,6 @@ void refrescarDirectori(GtkWidget *, gpointer );
 void ponerOpcionesACero();
 char *cambiarExtension(const char *, const char *);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
+int directorio_existe(const char *);
 
 #endif // INCLUDES_H
