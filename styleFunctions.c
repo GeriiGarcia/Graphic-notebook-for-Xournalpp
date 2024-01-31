@@ -180,7 +180,7 @@ const char* obtener_nombre_directorio(const char* ruta) {
     for (int i = 0; i < 6; i++) {
         subruta = strchr(subruta, '/');
         if (subruta) subruta += 1; // Avanza el puntero para saltar el '/'
-        else return NULL; // No se encontró la quinta '/', devuelve NULL
+        else return "/"; // No se encontró la quinta '/', devuelve NULL
     }
     return subruta;
 }

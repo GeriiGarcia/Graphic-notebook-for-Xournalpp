@@ -147,7 +147,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         printf("RECIENTES ACTIVADO: %d\n", recientesAplicacion->recientesActivado);
         if(recientesAplicacion->recientesActivado == 0)
         {
-            //printf("RECIENTES ACTIVADO AUX: %s\n", cwd);
             strcpy(recientesAplicacion->recientes[recientesAplicacion->numRecientes], obtener_nombre_directorio(cwd));
             strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], "/");
             strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], button_data->some_value);

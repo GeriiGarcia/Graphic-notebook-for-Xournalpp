@@ -31,13 +31,13 @@ void exportarAPdf(GtkWidget *widget, gpointer user_data)
     char pathArchivoXopp[2048] = "";
     strcat(pathArchivoXopp, agregarBarras(cwd));
     strcat(pathArchivoXopp, "/");
-    strcat(pathArchivoXopp, button_data->some_value);
+    strcat(pathArchivoXopp, agregarBarras(button_data->some_value));
 
     char pathArchivoPdf[2048] = "";
     strcat(pathArchivoPdf, agregarBarras(cwd));
     strcat(pathArchivoPdf, "/");
     char *nombreArchivoModificado = cambiarExtension(button_data->some_value, ".pdf");
-    strcat(pathArchivoPdf, nombreArchivoModificado);
+    strcat(pathArchivoPdf, agregarBarras(nombreArchivoModificado));
     
     char comando[8000] = "xournalpp --export-no-ruling --create-pdf=";
     strcat(comando, pathArchivoPdf);
@@ -54,18 +54,31 @@ void exportarAPdf(GtkWidget *widget, gpointer user_data)
 
 void abrirPdf(GtkWidget *widget, gpointer user_data)
 {
+    
     UserData *button_data = (UserData *)user_data;
+
+    if(recientesAplicacion->recientesActivado == 0)
+    {
+        strcpy(recientesAplicacion->recientes[recientesAplicacion->numRecientes], obtener_nombre_directorio(cwd));
+        strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], "/");
+        strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], button_data->some_value);
+        if(recientesAplicacion->numRecientes < 19)
+            recientesAplicacion->numRecientes++;
+        ordenar(recientesAplicacion, recientesAplicacion->recientes[recientesAplicacion->numRecientes], recientesAplicacion->recientesActivado);
+    }
+    
+
     char aux[2048] = "";
     strcat(aux, agregarBarras(cwd));
     strcat(aux, "/");
-    strcat(aux, button_data->some_value);
+    strcat(aux, agregarBarras(button_data->some_value));
 
     char comando[2048] = "open ";
     strcat(comando, aux);
     strcat(comando, " &");
+    printf("COMANDO: %s\n", comando);
 
     system(comando);
-    
 }
 
 gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -76,9 +89,13 @@ gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointe
     { // Botón derecho del ratón
         GtkWidget *menu = gtk_menu_new();
 
-        GtkWidget *opcion1 = gtk_menu_item_new_with_label("Suprimir");
-        g_signal_connect(opcion1, "activate", G_CALLBACK(suprimir), user_data);
-        gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion1);
+        if(recientesAplicacion->recientesActivado == 0)
+        {
+            GtkWidget *opcion1 = gtk_menu_item_new_with_label("Suprimir");
+            g_signal_connect(opcion1, "activate", G_CALLBACK(suprimir), user_data);
+            gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion1);
+        }
+        
 
         if(!strcmp(obtenerExtension(button_data->some_value), ".xopp"))
         {
