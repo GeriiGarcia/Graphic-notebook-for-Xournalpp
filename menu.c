@@ -196,6 +196,7 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
             if(directorio_existe(widget_value) == 1)
                 strcpy(rutaPredeterminada, widget_value);
             
+            borrarRecientes(botonOk, data);
             break;
         default:
             break;
@@ -206,10 +207,6 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
         gtk_widget_hide(botonOk);
         ponerOpcionesACero();
     }
-
-    
-    
-    
     
 }
 
@@ -437,6 +434,16 @@ void mostrar_previsualizaciones(GtkWidget *widget, gpointer data)
     refrescarDirectori(widget, data);
 }
 
+void borrarRecientes(GtkWidget *widget, gpointer data)
+{
+    for (int i = 0; i < recientesAplicacion->numRecientes; i++)
+        strcpy(recientesAplicacion->recientes[i], "");
+    
+    recientesAplicacion->numRecientes = 0;
+
+    if(recientesAplicacion->recientesActivado == 1)
+        refrescarDirectori(widget, data);
+}
 
 // Función que crea el menú y lo agrega al contenedor principal
 void create_menu(GtkWidget *main_box, GtkWidget *window) {
@@ -468,10 +475,15 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     GtkWidget *section1_3 = gtk_menu_item_new_with_label("Reset");
     g_signal_connect(G_OBJECT(section1_3), "activate", G_CALLBACK(reset), data);
 
+    GtkWidget *section1_4 = gtk_menu_item_new_with_label("Borrar recientes");
+    g_signal_connect(G_OBJECT(section1_4), "activate", G_CALLBACK(borrarRecientes), data);
+
+
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menu1), section1_1);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu1), section1_2);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu1), section1_3);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu1), section1_4);
 
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item1), menu1);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), item1);

@@ -103,4 +103,5 @@ gboolean on_button_right_click(GtkWidget *, GdkEventButton *, gpointer );
 const char* obtener_nombre_directorio(const char* );
 const char* obtener_nombre_archivo(const char* );
 void ordenar(struct Recientes *, const char *, int );
+void borrarRecientes(GtkWidget *, gpointer );
 #endif // INCLUDES_H

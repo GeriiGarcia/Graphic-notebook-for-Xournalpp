@@ -149,6 +149,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         if(recientesAplicacion->recientesActivado == 0)
         {
             char aux[1024] = "";
+            printf("CWD: %s SUB: %s PREDE %s\n", cwd, obtener_nombre_directorio(cwd), rutaPredeterminada);
             strcpy(aux, obtener_nombre_directorio(cwd));
             strcat(aux, "/");
             strcat(aux, button_data->some_value);

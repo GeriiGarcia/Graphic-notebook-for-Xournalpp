@@ -176,12 +176,30 @@ int directorio_existe(const char *ruta) {
 }
 
 const char* obtener_nombre_directorio(const char* ruta) {
-    const char* subruta = ruta;
+    /*const char* subruta = ruta;
     for (int i = 0; i < 6; i++) {
         subruta = strchr(subruta, '/');
         if (subruta) subruta += 1; // Avanza el puntero para saltar el '/'
         else return "/"; // No se encontró la quinta '/', devuelve NULL
     }
+    return subruta;*/
+
+    char* subruta = NULL;
+    
+    // Verificar si la cadena base está presente en la ruta completa
+    const char* inicio = strstr(ruta, rutaPredeterminada);
+    
+    if (inicio != NULL) {
+        // Calcular la longitud de la subruta
+        size_t longitudCadenaBase = strlen(rutaPredeterminada);
+        size_t longitudSubruta = strlen(inicio) - longitudCadenaBase;
+        
+        // Asignar memoria para la subruta y copiarla
+        subruta = (char*)malloc((longitudSubruta + 1) * sizeof(char));
+        strncpy(subruta, inicio + longitudCadenaBase, longitudSubruta);
+        subruta[longitudSubruta] = '\0';
+    }
+    
     return subruta;
 }
 
