@@ -96,7 +96,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     if(opcionesMenu[EXPORTAR_PDF] == 1 && recientesAplicacion->recientesActivado == 0)
     {
         ponerOpcionesACero();
-        printf("Exportar: %s\n", button_data->some_value);
 
         if(strcmp(obtenerExtension(button_data->some_value), "xopp"))
         {
@@ -145,11 +144,10 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     // en cas que haigi fet click a un .pdf o un .xopp, s'obrira el xournalpp
     if(strcmp(gtk_widget_get_name(widget), "pdf") == 0 || strcmp(gtk_widget_get_name(widget), "xournal") == 0)
     {
-        printf("RECIENTES ACTIVADO: %d\n", recientesAplicacion->recientesActivado);
+        
         if(recientesAplicacion->recientesActivado == 0)
         {
             char aux[1024] = "";
-            printf("CWD: %s SUB: %s PREDE %s\n", cwd, obtener_nombre_directorio(cwd), rutaPredeterminada);
             strcpy(aux, obtener_nombre_directorio(cwd));
             strcat(aux, "/");
             strcat(aux, button_data->some_value);
@@ -193,7 +191,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         {
             strcat(cwd,"/");
             chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
-            printf("%s\n",cwd);
         }
         else if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado"))
             recientesAplicacion->recientesActivado = 0;
@@ -236,7 +233,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         g_list_free(children);
 
         //Llistar directoris
-        g_print("Listando Directorios\n");
         char *archivosDirectorios[1024];
 
         for (int i = 0; i < 1024; i++) {
@@ -281,8 +277,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
                 while ((dir = readdir(d)) != NULL) 
                 {
-                    printf("%s\n", dir->d_name);
-
                     //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
                     if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || (!strcmp(obtenerExtension(dir->d_name), ".pdf")) && mostrarPdf == 1) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                     {
@@ -525,7 +519,6 @@ static void activate (GtkApplication *app, gpointer user_data){
 
 void alCierre()
 {
-    printf("ADIOS MUY BUENAS\n");
 
     // Abrir el archivo en modo de escritura
     FILE *archivo = fopen(guardarConfig, "w");
@@ -639,7 +632,6 @@ void cargarConfig()
                 fclose(archivo);
                 return;
             }
-            printf("ORDENAR ARCHIVOS: %d\n", ordenarArchivos);
             continue;
         }
 
@@ -651,7 +643,6 @@ void cargarConfig()
                 fclose(archivo);
                 return;
             }
-            printf("MOSTRAR PREVIEW: %d\n", mostrarPrevisualizaciones);
             continue;
         }
 
@@ -663,7 +654,6 @@ void cargarConfig()
                 fclose(archivo);
                 return;
             }
-            printf("MOSTRAR PDF: %d\n", mostrarPdf);
             continue;
         }
 

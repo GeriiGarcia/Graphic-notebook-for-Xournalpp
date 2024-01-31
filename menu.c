@@ -51,6 +51,11 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         refrescarDirectori(widget, user_data);
         return TRUE; // Indica que se ha manejado el evento
     }
+    else if(event->keyval == GDK_KEY_F6)
+    {
+        volverAInicio(widget, user_data);
+        return TRUE;
+    }
     else if(event->keyval == GDK_KEY_Return){
         GtkWidget *box = gtk_widget_get_parent(button_data->box);
         box = gtk_widget_get_parent(box);
@@ -527,8 +532,9 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     }
          
 
-    GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\tF5");
-    GtkWidget *section2_6 = gtk_menu_item_new_with_label("Volver a inicio");
+    GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\t\tF5");
+
+    GtkWidget *section2_6 = gtk_menu_item_new_with_mnemonic("_Volver a inicio\t\t\t\tF6");;
 
     g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(mostrar_pdf), data);
     g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(mostrar_previsualizaciones), data);

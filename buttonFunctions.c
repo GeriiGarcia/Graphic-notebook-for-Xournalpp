@@ -76,7 +76,6 @@ void abrirPdf(GtkWidget *widget, gpointer user_data)
     char comando[2048] = "open ";
     strcat(comando, aux);
     strcat(comando, " &");
-    printf("COMANDO: %s\n", comando);
 
     system(comando);
 }
@@ -285,8 +284,6 @@ void abrirXournal(GtkWidget *widget, gpointer data)
     GtkWidget *parent = gtk_widget_get_parent(button_data->box);
     parent = gtk_widget_get_parent(parent);
     parent = gtk_widget_get_parent(parent);
-
-    printf("Nombre del padre de main_box: %s\n", gtk_widget_get_name(parent));
 
     gchar *texto = "textOption";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(parent), texto);
