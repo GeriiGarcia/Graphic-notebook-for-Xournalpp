@@ -1,13 +1,20 @@
 OBJS	= startGtkApp.o
 SOURCE	= startGtkApp.c menu.c crearImagen.c styleFunctions.c buttonFunctions.c
-HEADER	= 
 OUT	= start
 CC	 = gcc
 FLAGS	 = -g -c -Wall
-LFLAGS	 = 
+MKDIR_P = mkdir -p
+USER = gerard
+DIR_TO_CREATE = /home/$(USER)/.libretaXournal
 
-all:
+all: create_directory
 	$(CC) -o $(OUT) `pkg-config --cflags gtk+-3.0` $(SOURCE) `pkg-config --libs --cflags gtk+-3.0` `pkg-config --cflags --libs poppler-glib` `pkg-config --libs --cflags libxml-2.0` -lfreeimage -lm && ./start
+
+create_directory:
+	@if [ ! -d $(DIR_TO_CREATE) ]; then \
+		echo "Creating directory: $(DIR_TO_CREATE);"; \
+		$(MKDIR_P) $(DIR_TO_CREATE); \
+	fi
 
 
 
