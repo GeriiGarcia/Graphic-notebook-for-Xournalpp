@@ -16,7 +16,7 @@ int mostrarPdf = 1;
 Recientes *recientesAplicacion;
 
 void ordenar(struct Recientes *recientes, const char *archivo, int activado) {
-    printf("ARCHIVO: %s\n", archivo);
+    
     if (activado == 0) 
     {
         // Mover todos los elementos una posición hacia la derecha
@@ -29,29 +29,24 @@ void ordenar(struct Recientes *recientes, const char *archivo, int activado) {
         
     } else if (activado == 1) 
     {
-        
         // Buscar el archivo y eliminarlo
-        
         for (int i = 0; i < recientes->numRecientes; i++) {
-            printf("BJABJHDSBHSDJD: %s\n", recientes->recientes[i]); 
             if (!strcmp(recientes->recientes[i], archivo)) {
                 // Eliminar el archivo
-                printf("MACARENA\n"); 
                 for (int j = i; j < recientes->numRecientes-1; j++) {
                     strcpy(recientes->recientes[j], recientes->recientes[j + 1]);
                 }
                 break;
             }
         }
-                // Mover todos los elementos una posición hacia la derecha
-        for (int i = recientes->numRecientes; i > 0; i--) {
+        
+        // Mover todos los elementos una posición hacia la derecha
+        for (int i = recientes->numRecientes; i > 0; i--)
             strcpy(recientes->recientes[i], recientes->recientes[i - 1]);
-        }
         
         // Agregar el nuevo archivo en la posición 0
         strcpy(recientes->recientes[0], archivo);
 
-        
     }
     
     strcpy(recientes->recientes[recientes->numRecientes], "");
@@ -135,9 +130,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             box = gtk_widget_get_parent(box);
             box = get_widget_by_name(GTK_CONTAINER(box), "textOption");
             
-            //cambiar nombre del texto y poner exportado
-            //gtk_entry_set_text(GTK_ENTRY(box), "Exportado");
-            
         }
 
         gtk_widget_hide(box);       
@@ -159,32 +151,28 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             strcpy(recientesAplicacion->recientes[recientesAplicacion->numRecientes], obtener_nombre_directorio(cwd));
             strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], "/");
             strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], button_data->some_value);
-            recientesAplicacion->numRecientes++;
+            if(recientesAplicacion->numRecientes < 19)
+                recientesAplicacion->numRecientes++;
             ordenar(recientesAplicacion, recientesAplicacion->recientes[recientesAplicacion->numRecientes], recientesAplicacion->recientesActivado);
         }
         else
         {   
             GtkWidget *box = gtk_widget_get_parent(widget);
-            printf("PADRE: %s\n", gtk_widget_get_name(widget));
 
-            //box = gtk_widget_get_parent(box);
-
-            GList *children2, *iter2;
-            children2 = gtk_container_get_children(GTK_CONTAINER(box));
+            GList *childrenArchivo, *iterArchivo;
+            childrenArchivo = gtk_container_get_children(GTK_CONTAINER(box));
             
-            for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+            for(iterArchivo = childrenArchivo; iterArchivo != NULL; iterArchivo = g_list_next(iterArchivo))
             {
 
-                if(GTK_IS_LABEL(iter2->data))
+                if(GTK_IS_LABEL(iterArchivo->data))
                 {
-                    ordenar(recientesAplicacion, gtk_label_get_text(iter2->data), recientesAplicacion->recientesActivado);
+                    ordenar(recientesAplicacion, gtk_label_get_text(iterArchivo->data), recientesAplicacion->recientesActivado);
                     break;
                 }            
             }
             
         }
-
-        
 
         char comando[1024] = "";
         char xournal[1024] = "xournalpp "; 
@@ -257,12 +245,12 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Recientes") && strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado")) // Si tengo que listar Recientes
         {
             // borro tots els fills del box de fitxers
-            GList *children2, *iter2;
-            children2 = gtk_container_get_children(GTK_CONTAINER(button_data->box));
-            for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
-                gtk_widget_destroy(GTK_WIDGET(iter2->data));
+            GList *destroyChildren, *destroyIter;
+            destroyChildren = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+            for(destroyIter = destroyChildren; destroyIter != NULL; destroyIter = g_list_next(destroyIter))
+                gtk_widget_destroy(GTK_WIDGET(destroyIter->data));
 
-            g_list_free(children2);
+            g_list_free(destroyChildren);
 
             for (int i = 0; i < 20; i++)
             {
@@ -276,12 +264,12 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         else // Si tengo que listar un directorio
         {
             // borro tots els fills del box de fitxers
-            GList *children2, *iter2;
-            children2 = gtk_container_get_children(GTK_CONTAINER(button_data->box));
-            for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
-                gtk_widget_destroy(GTK_WIDGET(iter2->data));
+            GList *destroyChildren, *destroyIter;
+            destroyChildren = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+            for(destroyIter = destroyChildren; destroyIter != NULL; destroyIter = g_list_next(destroyIter))
+                gtk_widget_destroy(GTK_WIDGET(destroyIter->data));
 
-            g_list_free(children2);
+            g_list_free(destroyChildren);
 
             DIR *d;
             struct dirent *dir;
@@ -311,7 +299,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         }
 
         
-
         int i = 1;
         int j = 0;
         for (int k = 0; k < n; k++) //mostrare els artxius un cop ordenats
@@ -336,8 +323,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border_margin_pdf");
                     gtk_widget_set_name(normalButton, "pdf");
                 }
-
-                
 
                 gtk_widget_set_margin_start(normalButton, MARGIN);
                 gtk_widget_set_margin_end(normalButton, MARGIN);
@@ -368,7 +353,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 strcat(auxPdf, archivosDirectorios[k]);
 
                 strcat(auxPrev, guardarPrevisualizaciones);
-                strcat(auxPrev, archivosDirectorios[k]);
+                strcat(auxPrev, obtener_nombre_archivo(archivosDirectorios[k])); //obtener_nombre_archivo es para Recientes y no cambia nada en Predeterminado
                 strcat(auxPrev, ".png");
 
                 pdf_to_image(auxPdf, auxPrev);
@@ -397,7 +382,6 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     
                 system("rm /home/gerard/.libretaXournal/previewXournal.xml");
                 
-
             }
 
                     
