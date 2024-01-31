@@ -3,7 +3,8 @@
 
 char rutaPredeterminada[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
-char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/";
+char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/cache/";
+char guardarConfig[1024] = "/home/gerard/.libretaXournal/config/config.txt";
 char directorioMas[1024] = "/home/gerard/Gerard/Projects/libreriaGrafica/IMG/plus_icon.png";
 char *css =
     ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
@@ -147,12 +148,13 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         printf("RECIENTES ACTIVADO: %d\n", recientesAplicacion->recientesActivado);
         if(recientesAplicacion->recientesActivado == 0)
         {
-            strcpy(recientesAplicacion->recientes[recientesAplicacion->numRecientes], obtener_nombre_directorio(cwd));
-            strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], "/");
-            strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], button_data->some_value);
+            char aux[1024] = "";
+            strcpy(aux, obtener_nombre_directorio(cwd));
+            strcat(aux, "/");
+            strcat(aux, button_data->some_value);
             if(recientesAplicacion->numRecientes < 19)
                 recientesAplicacion->numRecientes++;
-            ordenar(recientesAplicacion, recientesAplicacion->recientes[recientesAplicacion->numRecientes], recientesAplicacion->recientesActivado);
+            ordenar(recientesAplicacion, aux, recientesAplicacion->recientesActivado);
         }
         else
         {   
@@ -520,12 +522,162 @@ static void activate (GtkApplication *app, gpointer user_data){
     g_free(userdata);
 }
 
+void alCierre()
+{
+    printf("ADIOS MUY BUENAS\n");
+
+    // Abrir el archivo en modo de escritura
+    FILE *archivo = fopen(guardarConfig, "w");
+    if (archivo == NULL) {
+        perror("Error al abrir el archivo para escribir");
+        return;
+    }
+
+    //archivos recientes
+    fprintf(archivo, "%d\n", recientesAplicacion->numRecientes);
+    for (int i = 0; i < recientesAplicacion->numRecientes; i++)
+    {
+        fprintf(archivo, "%s\n", recientesAplicacion->recientes[i]);
+    }
+
+    //ruta predeterminada
+    fprintf(archivo, "%s\n", rutaPredeterminada);
+    fprintf(archivo, "%d\n", ordenarArchivos);
+    fprintf(archivo, "%d\n", mostrarPrevisualizaciones);
+    fprintf(archivo, "%d\n", mostrarPdf);
+
+
+    // Cerrar el archivo
+    fclose(archivo);
+
+}
+
+void cargarConfig()
+{
+    //cargar archivos recientes a partir de numRecientes que esta guardado en la primera linea
+    FILE *archivo = fopen(guardarConfig, "r");
+
+    if (archivo == NULL) {
+        perror("Error al abrir el archivo");
+        return;
+    }
+
+    char buffer[1024];
+    
+    // Leer el número de líneas
+    if (fscanf(archivo, "%d", &recientesAplicacion->numRecientes) != 1) {
+        fprintf(stderr, "Error al leer el número de líneas\n");
+        fclose(archivo);
+        return;
+    }
+
+    
+    // Declarar el array bidimensional
+    
+    // Leer las líneas y almacenarlas en el array
+    for (int i = 0; i < recientesAplicacion->numRecientes+5; i++) {
+        if(i == 0)
+        {
+            if (fgets(buffer, sizeof(buffer), archivo) != NULL) 
+            {
+            } else 
+            {
+                fclose(archivo);
+                return;
+            }
+            continue;
+        }
+        
+        if(i >=1 && i <= recientesAplicacion->numRecientes)
+        {
+            if (fgets(buffer, sizeof(buffer), archivo) != NULL) 
+            {
+                // Eliminar el carácter de nueva línea si está presente
+                char *posNuevaLinea = strchr(buffer, '\n');
+                if (posNuevaLinea != NULL) {
+                    *posNuevaLinea = '\0';
+                }
+                // Copiar la línea al array bidimensional
+                strcpy(recientesAplicacion->recientes[i-1], buffer);
+            } else 
+            {
+                fprintf(stderr, "Error al leer la línea %d\n", i + 1);
+                fclose(archivo);
+                return;
+            }
+
+            continue;
+        }
+
+        if(i == recientesAplicacion->numRecientes+1)
+        {
+            if (fgets(buffer, sizeof(buffer), archivo) != NULL) 
+            {
+                // Eliminar el carácter de nueva línea si está presente
+                char *posNuevaLinea = strchr(buffer, '\n');
+                if (posNuevaLinea != NULL) {
+                    *posNuevaLinea = '\0';
+                }
+                // Copiar la línea al array bidimensional
+                strcpy(rutaPredeterminada, buffer);
+                strcpy(cwd, buffer);
+            } else 
+            {
+                fprintf(stderr, "Error al leer la línea %d\n", i + 1);
+                fclose(archivo);
+                return;
+            }
+            continue;
+        }
+
+        if(i == recientesAplicacion->numRecientes+2)
+        {
+            if (fscanf(archivo, "%d", &ordenarArchivos) != 1) 
+            {
+                fprintf(stderr, "Error al leer el número de líneas\n");
+                fclose(archivo);
+                return;
+            }
+            printf("ORDENAR ARCHIVOS: %d\n", ordenarArchivos);
+            continue;
+        }
+
+        if(i == recientesAplicacion->numRecientes+3)
+        {
+            if (fscanf(archivo, "%d", &mostrarPrevisualizaciones) != 1) 
+            {
+                fprintf(stderr, "Error al leer el número de líneas\n");
+                fclose(archivo);
+                return;
+            }
+            printf("MOSTRAR PREVIEW: %d\n", mostrarPrevisualizaciones);
+            continue;
+        }
+
+        if(i == recientesAplicacion->numRecientes+4)
+        {
+            if (fscanf(archivo, "%d", &mostrarPdf) != 1) 
+            {
+                fprintf(stderr, "Error al leer el número de líneas\n");
+                fclose(archivo);
+                return;
+            }
+            printf("MOSTRAR PDF: %d\n", mostrarPdf);
+            continue;
+        }
+
+    }
+
+    fclose(archivo);
+}
 
 int main( int argc, char **argv){
     GtkApplication *app;
 
     recientesAplicacion = g_new(Recientes, 1);
     recientesAplicacion->numRecientes = 0;
+
+    cargarConfig();
     recientesAplicacion->recientesActivado = 0;
 
     chdir(cwd);
@@ -536,8 +688,10 @@ int main( int argc, char **argv){
 
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     
+    g_signal_connect(app, "shutdown", G_CALLBACK(alCierre), NULL);
 
     g_application_run(G_APPLICATION(app), argc, argv);
+    
 
     g_object_unref(app);
 

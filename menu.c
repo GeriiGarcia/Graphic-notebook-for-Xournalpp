@@ -244,8 +244,25 @@ void reset(GtkWidget *widget, gpointer data)
 
 void vaciarCache()
 {
-    system("rm -rf /home/$(whoami)/.libretaXournal");
-    system("mkdir /home/$(whoami)/.libretaXournal");
+
+    char *comando_inicial = "rm -rf ";
+    char *comandoRm = (char *)malloc(strlen(guardarPrevisualizaciones) + 1 +strlen(comando_inicial)); // Asignar memoria
+    strcpy(comandoRm, comando_inicial);
+    strcat(comandoRm, guardarPrevisualizaciones);
+
+    system(comandoRm);
+
+
+    char *comando_inicial2 = "mkdir ";
+    char *comandoMkdir = (char *)malloc(strlen(guardarPrevisualizaciones) + 1 +strlen(comando_inicial2)); // Asignar memoria
+    strcpy(comandoMkdir, comando_inicial2);
+    strcat(comandoMkdir, guardarPrevisualizaciones);
+
+    system(comandoMkdir);
+
+
+    free(comandoRm);
+    free(comandoMkdir);
 }
 
 //encontrar items de un submenu del menu
@@ -420,10 +437,6 @@ void mostrar_previsualizaciones(GtkWidget *widget, gpointer data)
     refrescarDirectori(widget, data);
 }
 
-// Función que maneja la selección de los elementos del menú
-void on_menu_item_activate(GtkMenuItem *menu_item, gpointer data) {
-    g_print("Se seleccionó: %s\n", (const char *)data);
-}
 
 // Función que crea el menú y lo agrega al contenedor principal
 void create_menu(GtkWidget *main_box, GtkWidget *window) {
@@ -469,18 +482,38 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     gtk_widget_set_name(item2, "item2");
 
     section2_1 =  gtk_check_menu_item_new_with_label("Mostrar PDFs?");
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_1), TRUE);
+    if(mostrarPdf == 1)
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_1), TRUE);
+    else if(mostrarPdf == 0)
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_1), FALSE);
+    
     section2_2 =  gtk_check_menu_item_new_with_label("Mostrar previsializaciones?");
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_2), TRUE);
+    if(mostrarPrevisualizaciones == 1)
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_2), TRUE);
+    else if(mostrarPrevisualizaciones == 0)
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_2), FALSE);
+
     GtkWidget *section2_3 = gtk_menu_item_new_with_label("Cambiar ruta predeterminada");
 
     GtkWidget *section2_4 = gtk_menu_item_new_with_label("Ordenar");
     GtkWidget *section2_4_0 = gtk_menu_new();
     GSList *group = NULL;
     // Crear las opciones como elementos de menú de radio
-    GtkWidget *section2_4_1 = gtk_radio_menu_item_new_with_label(group, "Xopp primero");
-    group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
-    GtkWidget *section2_4_2 = gtk_radio_menu_item_new_with_label(group, "Pdf primero");
+    GtkWidget *section2_4_1 = gtk_radio_menu_item_new_with_label(NULL, "Xopp primero");
+    GtkWidget *section2_4_2 = gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(section2_4_1), "Pdf primero");
+    if(ordenarArchivos == 0)
+    {
+        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_1), TRUE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_2), FALSE);
+    }
+    else if(ordenarArchivos == 1)
+    {
+        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_1), FALSE);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_2), TRUE);
+    }
+         
 
     GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\tF5");
     GtkWidget *section2_6 = gtk_menu_item_new_with_label("Volver a inicio");
