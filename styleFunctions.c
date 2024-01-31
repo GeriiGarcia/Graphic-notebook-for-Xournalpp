@@ -174,3 +174,20 @@ int directorio_existe(const char *ruta) {
         return 0;
     }
 }
+
+const char* obtener_nombre_directorio(const char* ruta) {
+    const char* subruta = ruta;
+    for (int i = 0; i < 6; i++) {
+        subruta = strchr(subruta, '/');
+        if (subruta) subruta += 1; // Avanza el puntero para saltar el '/'
+        else return NULL; // No se encontró la quinta '/', devuelve NULL
+    }
+    return subruta;
+}
+
+const char* obtener_nombre_archivo(const char* ruta) {
+    const char* nombre = strrchr(ruta, '/');
+    if (nombre) nombre += 1; // Avanza el puntero para saltar el '/'
+    else nombre = ruta; // No se encontró '/', la ruta es el nombre del archivo
+    return nombre;
+}

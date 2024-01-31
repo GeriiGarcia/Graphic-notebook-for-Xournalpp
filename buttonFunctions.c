@@ -4,7 +4,7 @@
 void abrirXournal(GtkWidget *, gpointer );
 void on_button_clicked(GtkWidget *, gpointer );
 void afegirPredeterminat(GtkWidget *);
-GtkWidget *create_file_button(const char *, gpointer , char *);
+GtkWidget *create_file_button(const char *, gpointer , char *, int);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 void ponerOpcionesACero();
 
@@ -127,7 +127,7 @@ void box_add(GtkWidget *parent_box, char *class, const char * auxPrev, gpointer 
 
     UserData *button_data = (UserData *)data;
 
-    GtkWidget *normalButton = create_file_button(auxPrev, data, d_name);
+    GtkWidget *normalButton = create_file_button(auxPrev, data, d_name, esPdf);
     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border");
     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), class);
 
@@ -222,7 +222,7 @@ void on_button_unhover(GtkWidget *widget, gpointer data) {
 }
 
 
-GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name) {
+GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name, int esPdf) {
     UserData *button_data = (UserData *)data;
 
     // Crear un contenedor para el botón y la vista previa
@@ -236,7 +236,12 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name)
 
     // Crear un GtkButton con la vista previa como contenido
     GtkWidget *button = gtk_button_new();
-    gtk_widget_set_name(button, "pdf");
+
+    if(esPdf == 0)
+        gtk_widget_set_name(button, "xournal");
+    else
+        gtk_widget_set_name(button, "pdf");
+
     gtk_widget_set_size_request(button, 50, 50);  // Establecer el tamaño del botón
     gtk_container_add(GTK_CONTAINER(button), image);
     gtk_container_add(GTK_CONTAINER(box), button);

@@ -1,5 +1,5 @@
 #include "includes.h"
-#include <string.h>
+
 
 char rutaPredeterminada[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
@@ -13,6 +13,50 @@ int opcionesMenu[20];
 int ordenarArchivos = 0;
 int mostrarPrevisualizaciones = 1;
 int mostrarPdf = 1;
+Recientes *recientesAplicacion;
+
+void ordenar(struct Recientes *recientes, const char *archivo, int activado) {
+    printf("ARCHIVO: %s\n", archivo);
+    if (activado == 0) 
+    {
+        // Mover todos los elementos una posición hacia la derecha
+        for (int i = recientes->numRecientes; i > 0; i--) {
+            strcpy(recientes->recientes[i], recientes->recientes[i - 1]);
+        }
+        // Agregar el nuevo archivo en la posición 0
+        strcpy(recientes->recientes[0], archivo);
+
+        
+    } else if (activado == 1) 
+    {
+        
+        // Buscar el archivo y eliminarlo
+        
+        for (int i = 0; i < recientes->numRecientes; i++) {
+            printf("BJABJHDSBHSDJD: %s\n", recientes->recientes[i]); 
+            if (!strcmp(recientes->recientes[i], archivo)) {
+                // Eliminar el archivo
+                printf("MACARENA\n"); 
+                for (int j = i; j < recientes->numRecientes-1; j++) {
+                    strcpy(recientes->recientes[j], recientes->recientes[j + 1]);
+                }
+                break;
+            }
+        }
+                // Mover todos los elementos una posición hacia la derecha
+        for (int i = recientes->numRecientes; i > 0; i--) {
+            strcpy(recientes->recientes[i], recientes->recientes[i - 1]);
+        }
+        
+        // Agregar el nuevo archivo en la posición 0
+        strcpy(recientes->recientes[0], archivo);
+
+        
+    }
+    
+    strcpy(recientes->recientes[recientes->numRecientes], "");
+    
+}
 
 
 void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, int x, int y, GtkSelectionData *sel_data, guint info, guint time, gpointer data) {
@@ -53,7 +97,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     GtkWidget *box = NULL;
     GtkWidget *main;
     //en caso que se le haya dado a exportar
-    if(opcionesMenu[EXPORTAR_PDF] == 1)
+    if(opcionesMenu[EXPORTAR_PDF] == 1 && recientesAplicacion->recientesActivado == 0)
     {
         ponerOpcionesACero();
         printf("Exportar: %s\n", button_data->some_value);
@@ -108,13 +152,46 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
     // en cas que haigi fet click a un .pdf o un .xopp, s'obrira el xournalpp
     if(strcmp(gtk_widget_get_name(widget), "pdf") == 0 || strcmp(gtk_widget_get_name(widget), "xournal") == 0)
     {
+        printf("RECIENTES ACTIVADO: %d\n", recientesAplicacion->recientesActivado);
+        if(recientesAplicacion->recientesActivado == 0)
+        {
+            //printf("RECIENTES ACTIVADO AUX: %s\n", cwd);
+            strcpy(recientesAplicacion->recientes[recientesAplicacion->numRecientes], obtener_nombre_directorio(cwd));
+            strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], "/");
+            strcat(recientesAplicacion->recientes[recientesAplicacion->numRecientes], button_data->some_value);
+            recientesAplicacion->numRecientes++;
+            ordenar(recientesAplicacion, recientesAplicacion->recientes[recientesAplicacion->numRecientes], recientesAplicacion->recientesActivado);
+        }
+        else
+        {   
+            GtkWidget *box = gtk_widget_get_parent(widget);
+            printf("PADRE: %s\n", gtk_widget_get_name(widget));
+
+            //box = gtk_widget_get_parent(box);
+
+            GList *children2, *iter2;
+            children2 = gtk_container_get_children(GTK_CONTAINER(box));
+            
+            for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+            {
+
+                if(GTK_IS_LABEL(iter2->data))
+                {
+                    ordenar(recientesAplicacion, gtk_label_get_text(iter2->data), recientesAplicacion->recientesActivado);
+                    break;
+                }            
+            }
+            
+        }
+
+        
+
         char comando[1024] = "";
         char xournal[1024] = "xournalpp "; 
         strcat(comando, cwd);
         strcat(comando, "/");
         strcat(comando, button_data->some_value);
         strcat(xournal, agregarBarras(comando));
-        printf("COMANDO: %s\n", xournal);
         system(strcat(xournal, " &")); //para que se vaya al background
     }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
@@ -122,12 +199,17 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
         if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)),".."))
             quitarDesdeUltimaBarra(cwd);
-        else if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado")) // si no li he fet click a Predeterminado
+        else if(strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado") && strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Recientes")) // si no li he fet click a Predeterminado
         {
             strcat(cwd,"/");
             chdir(strcat(cwd,gtk_button_get_label(GTK_BUTTON(widget))));
             printf("%s\n",cwd);
         }
+        else if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado"))
+            recientesAplicacion->recientesActivado = 0;
+        else if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Recientes"))
+            recientesAplicacion->recientesActivado = 1;
+        
 
         //agafo el pare del widget i canvio el text del directori actual
         GtkWidget *parent = gtk_widget_get_parent(button_data->box);
@@ -163,53 +245,72 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
         g_list_free(children);
 
-        
-
-
-        // borro tots els fills del box de fitxers
-        GList *children2, *iter2;
-        children2 = gtk_container_get_children(GTK_CONTAINER(button_data->box));
-        for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
-            gtk_widget_destroy(GTK_WIDGET(iter2->data));
-
-        g_list_free(children2);
-
         //Llistar directoris
         g_print("Listando Directorios\n");
-
         char *archivosDirectorios[1024];
 
         for (int i = 0; i < 1024; i++) {
             archivosDirectorios[i] = NULL;
         }
-
         int n = 0;
-
-        DIR *d;
-        struct dirent *dir;
-        d = opendir(cwd);
-        if (d) 
+        
+        if(!strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Recientes") && strcmp(gtk_button_get_label(GTK_BUTTON(widget)), "Predeterminado")) // Si tengo que listar Recientes
         {
-            
-            while ((dir = readdir(d)) != NULL) 
+            // borro tots els fills del box de fitxers
+            GList *children2, *iter2;
+            children2 = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+            for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+                gtk_widget_destroy(GTK_WIDGET(iter2->data));
+
+            g_list_free(children2);
+
+            for (int i = 0; i < 20; i++)
             {
-                printf("%s\n", dir->d_name);
-
-                //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
-                if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || (!strcmp(obtenerExtension(dir->d_name), ".pdf")) && mostrarPdf == 1) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
-                {
-                    archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
-                    archivosDirectorios[n][0] = '\0';
-                    strcat(archivosDirectorios[n], dir->d_name);
-                    n++;
-                }
-
+                archivosDirectorios[i] = (char *)malloc(strlen(recientesAplicacion->recientes[i]) + 1); // Asignar memoria
+                archivosDirectorios[i][0] = '\0';
+                strcat(archivosDirectorios[i], recientesAplicacion->recientes[i]);
             }
-            closedir(d);
+
+            n = recientesAplicacion->numRecientes;
+        }
+        else // Si tengo que listar un directorio
+        {
+            // borro tots els fills del box de fitxers
+            GList *children2, *iter2;
+            children2 = gtk_container_get_children(GTK_CONTAINER(button_data->box));
+            for(iter2 = children2; iter2 != NULL; iter2 = g_list_next(iter2))
+                gtk_widget_destroy(GTK_WIDGET(iter2->data));
+
+            g_list_free(children2);
+
+            DIR *d;
+            struct dirent *dir;
+            d = opendir(cwd);
+            if (d) 
+            {
+
+                while ((dir = readdir(d)) != NULL) 
+                {
+                    printf("%s\n", dir->d_name);
+
+                    //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
+                    if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || (!strcmp(obtenerExtension(dir->d_name), ".pdf")) && mostrarPdf == 1) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+                    {
+                        archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
+                        archivosDirectorios[n][0] = '\0';
+                        strcat(archivosDirectorios[n], dir->d_name);
+                        n++;
+                    }
+
+                }
+                closedir(d);
+            }
+
+            //ordenar archivosDirectorios[n]   
+            qsort(archivosDirectorios, n, sizeof(char *), compararArchivos);
         }
 
-        //ordenar archivosDirectorios[n]   
-        qsort(archivosDirectorios, n, sizeof(char *), compararArchivos);
+        
 
         int i = 1;
         int j = 0;
@@ -287,9 +388,8 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 strcat(auxXopp, archivosDirectorios[k]);
     
                 strcat(auxPrev, guardarPrevisualizaciones);
-                strcat(auxPrev, archivosDirectorios[k]);
+                strcat(auxPrev, obtener_nombre_archivo(archivosDirectorios[k]));
                 strcat(auxPrev, ".png");
-    
                 base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
     
                 css_add(css);
@@ -394,7 +494,12 @@ static void activate (GtkApplication *app, gpointer user_data){
 
     //la primera pantalla la deixare per si vull posar més d'una opcio quan s'inicii l'aplicacio, com opcions de configuracio o algo aixi.
     button1 = gtk_button_new_with_label("Predeterminado"); //creamos el boton 1
-    gtk_grid_attach(GTK_GRID(files), button1, 0, 0, 50, 50);
+    gtk_grid_attach(GTK_GRID(files), button1, 0, 0, 1, 1);
+    gtk_widget_set_margin_top(button1, MARGIN);
+    gtk_widget_set_margin_bottom(button1, MARGIN);
+
+    GtkWidget *button2 = gtk_button_new_with_label("Recientes");
+    gtk_grid_attach(GTK_GRID(files), button2, 0, 1, 1, 1);
 
     create_menu(main, window);
 
@@ -403,7 +508,11 @@ static void activate (GtkApplication *app, gpointer user_data){
     strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
     userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
     userdata->box = files;
+
     g_signal_connect(button1, "clicked", G_CALLBACK(on_button_clicked), userdata);
+    strncpy(userdata->some_value, "button2", sizeof(userdata->some_value) - 1);
+    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+    g_signal_connect(button2, "clicked", G_CALLBACK(on_button_clicked), userdata);
     
     gtk_fixed_put(GTK_FIXED(containerPath), view, 5, 5);
 
@@ -432,6 +541,10 @@ static void activate (GtkApplication *app, gpointer user_data){
 int main( int argc, char **argv){
     GtkApplication *app;
 
+    recientesAplicacion = g_new(Recientes, 1);
+    recientesAplicacion->numRecientes = 0;
+    recientesAplicacion->recientesActivado = 0;
+
     chdir(cwd);
 
     getcwd(cwd, sizeof(cwd));
@@ -447,3 +560,11 @@ int main( int argc, char **argv){
 
     return 0;
 }   
+
+
+
+        
+        
+    
+
+

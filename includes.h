@@ -2,7 +2,7 @@
 #define INCLUDES_H
 
 #include <gtk/gtk.h>
-
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h> 
@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <glib.h>
 
 
 
@@ -50,7 +51,6 @@ extern int opcionesMenu[20];
 */ 
 extern int ordenarArchivos;
 
-
 /***
  * @param 0 no 
  * @param 1 si
@@ -63,6 +63,16 @@ extern int mostrarPdf;
 */ 
 extern int mostrarPrevisualizaciones;
 
+typedef struct Recientes Recientes;
+struct Recientes{
+    char recientes[20][1024];
+    int numRecientes;
+    int recientesActivado;
+};
+
+extern Recientes *recientesAplicacion;
+
+
 typedef struct {
     char some_value[1024];
     GtkWidget *box;
@@ -74,7 +84,7 @@ void pdf_to_image(const char *, const char *);
 void on_button_clicked(GtkWidget *, gpointer );
 void base64_to_image(const char *, const char *);
 xmlChar* copiar_y_extraer_preview(const char *, const char *);
-GtkWidget *create_file_button(const char *, gpointer , char *);
+GtkWidget *create_file_button(const char *, gpointer , char *, int);
 void quitarDesdeUltimaBarra(char *);
 const char *obtenerExtension(const char *);
 char* agregarBarras(char *);
@@ -90,5 +100,7 @@ char *cambiarExtension(const char *, const char *);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 int directorio_existe(const char *);
 gboolean on_button_right_click(GtkWidget *, GdkEventButton *, gpointer );
+const char* obtener_nombre_directorio(const char* );
+const char* obtener_nombre_archivo(const char* );
 
 #endif // INCLUDES_H

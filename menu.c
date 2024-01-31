@@ -291,8 +291,13 @@ void refrescarDirectori(GtkWidget *widget, gpointer data)
 
     //per refrescar la pagina 
     //El que faig es afegir un element amb el nom Predeterminat a la grid i per-li click "artificialment"
-    GtkWidget *auxButton = gtk_button_new_with_label("Predeterminado");
-    gtk_grid_attach(GTK_GRID(box), auxButton, 0, 0, 50, 50);
+    GtkWidget *auxButton;
+    if(recientesAplicacion->recientesActivado == 0)
+        auxButton = gtk_button_new_with_label("Predeterminado");
+    else if(recientesAplicacion->recientesActivado == 1)
+        auxButton = gtk_button_new_with_label("Recientes");
+    
+    gtk_grid_attach(GTK_GRID(box), auxButton, 0, 0, 1, 1);
 
     UserData *userdata = g_new(UserData, 1);
     strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
@@ -360,7 +365,7 @@ void volverAInicio(GtkWidget *widget, gpointer data)
 {
     strcpy(cwd, rutaPredeterminada);
     chdir(rutaPredeterminada);
-    refrescarDirectori(widget, data);
+    refrescarDirectori(widget, data);    
 
     UserData *button_data = (UserData *)data;
     GtkWidget *box = gtk_widget_get_parent(button_data->box);
@@ -373,13 +378,22 @@ void volverAInicio(GtkWidget *widget, gpointer data)
         gtk_widget_destroy(GTK_WIDGET(iter2->data));
 
     GtkWidget *auxButton = gtk_button_new_with_label("Predeterminado");
-    gtk_grid_attach(GTK_GRID(box), auxButton, 0, 0, 50, 50);
+    gtk_widget_set_margin_top(auxButton, MARGIN);
+    gtk_widget_set_margin_bottom(auxButton, MARGIN);
+    gtk_grid_attach(GTK_GRID(box), auxButton, 0, 0, 1, 1);
+
+    GtkWidget *button2 = gtk_button_new_with_label("Recientes");
+    gtk_grid_attach(GTK_GRID(box), button2, 0, 1, 1, 1);
 
     UserData *userdata = g_new(UserData, 1);
     strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
     userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
     userdata->box = box;
     g_signal_connect(auxButton, "clicked", G_CALLBACK(on_button_clicked), userdata);
+
+    strncpy(userdata->some_value, "button2", sizeof(userdata->some_value) - 1);
+    userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
+    g_signal_connect(button2, "clicked", G_CALLBACK(on_button_clicked), userdata);
 
     
     gtk_widget_show_all(box);
