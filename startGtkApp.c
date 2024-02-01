@@ -281,10 +281,9 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                     //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
                     if((strcmp(dir->d_name, ".")&& (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp")|| (!strcmp(obtenerExtension(dir->d_name), ".pdf") && mostrarPdf == 1))))) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                     {
-                        if(!strcmp(dir->d_name, "..") && !strcmp(cwd, rutaPredeterminada))
-                        {
-                            continue;;
-                        }
+                        if(!strcmp(dir->d_name, "..") && !strcmp(cwd, rutaPredeterminada)) // si estoy en el directorio predetermindo, no mostrar ".."
+                            continue;
+                        
                         archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
                         archivosDirectorios[n][0] = '\0';
                         strcat(archivosDirectorios[n], dir->d_name);

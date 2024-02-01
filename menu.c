@@ -68,6 +68,17 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         userdata->box = box;
         runOk(botoOk, userdata);
         g_free(userdata);
+        return TRUE;
+    }
+    else if(event->keyval == GDK_KEY_Escape)
+    {
+        GtkWidget *box = gtk_widget_get_parent(button_data->box);
+        box = gtk_widget_get_parent(box);
+        box = gtk_widget_get_parent(box);
+        box = get_widget_by_name(GTK_CONTAINER(box), "fijo");
+        UserData *userdata = g_new(UserData, 1);
+        userdata->box = box;
+        reset(widget, userdata);
     }
 
     return FALSE; // Permite que otros manejadores de eventos procesen la tecla
@@ -474,7 +485,7 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     section1_2 = gtk_menu_item_new_with_label("Exportar a PDF");
     g_signal_connect(G_OBJECT(section1_2), "activate", G_CALLBACK(exportarPdf), data);
 
-    GtkWidget *section1_3 = gtk_menu_item_new_with_label("Reset");
+    GtkWidget *section1_3 = gtk_menu_item_new_with_mnemonic("_Reset\t\t\tESC");
     g_signal_connect(G_OBJECT(section1_3), "activate", G_CALLBACK(reset), data);
 
     GtkWidget *section1_4 = gtk_menu_item_new_with_label("Borrar recientes");
@@ -530,8 +541,7 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
          
 
     GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\t\t\tF5");
-
-    GtkWidget *section2_6 = gtk_menu_item_new_with_mnemonic("_Volver a inicio\t\t\t\t\tF6");;
+    GtkWidget *section2_6 = gtk_menu_item_new_with_mnemonic("_Volver a inicio\t\t\t\t\tF6");
 
     g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(mostrar_pdf), data);
     g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(mostrar_previsualizaciones), data);
