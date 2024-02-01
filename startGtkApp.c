@@ -138,6 +138,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         UserData *refrescar = g_new(UserData, 1);
         refrescar->box = main;
         refrescarDirectori(widget, refrescar);
+        g_free(refrescar);
         return;
     }
 
@@ -278,8 +279,12 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 while ((dir = readdir(d)) != NULL) 
                 {
                     //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
-                    if(strcmp(dir->d_name, ".")&& (!strcmp(obtenerExtension(dir->d_name), "Sin extensión")|| (!strcmp(obtenerExtension(dir->d_name), ".xopp")|| (!strcmp(obtenerExtension(dir->d_name), ".pdf") && mostrarPdf == 1)))) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+                    if((strcmp(dir->d_name, ".")&& (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp")|| (!strcmp(obtenerExtension(dir->d_name), ".pdf") && mostrarPdf == 1))))) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                     {
+                        if(!strcmp(dir->d_name, "..") && !strcmp(cwd, rutaPredeterminada))
+                        {
+                            continue;;
+                        }
                         archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
                         archivosDirectorios[n][0] = '\0';
                         strcat(archivosDirectorios[n], dir->d_name);
@@ -376,7 +381,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 css_add(CSS);
                 box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
     
-                system("rm /home/gerard/.libretaXournal/previewXournal.xml");
+                remove("/home/gerard/.libretaXournal/previewXournal.xml");
                 
             }
 
@@ -431,7 +436,7 @@ static void activate (GtkApplication *app){
     UserData *runData = g_new(UserData, 1);
     runData->box = containerPath;
     g_signal_connect(ok, "clicked", G_CALLBACK(runOk), runData);
-    
+
 
    
     GtkWidget *view;
@@ -543,6 +548,7 @@ void alCierre()
 
     // Cerrar el archivo
     fclose(archivo);
+    g_free(recientesAplicacion);
 
 }
 
@@ -666,6 +672,10 @@ int main( int argc, char **argv){
     GtkApplication *app;
 
     recientesAplicacion = g_new(Recientes, 1);
+
+    for (int i = 0; i < 20; i++)
+        strcpy(recientesAplicacion->recientes[i], "");
+    
     recientesAplicacion->numRecientes = 0;
 
     cargarConfig();

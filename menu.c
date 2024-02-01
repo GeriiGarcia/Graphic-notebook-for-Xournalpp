@@ -67,6 +67,7 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         UserData *userdata = g_new(UserData, 1);
         userdata->box = box;
         runOk(botoOk, userdata);
+        g_free(userdata);
     }
 
     return FALSE; // Permite que otros manejadores de eventos procesen la tecla
@@ -155,10 +156,7 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 strcat(aux, widget_value);
                 char *aux2 = agregarBarras(aux); 
 
-                char mkdir[2056] = "mkdir ";
-                strcat(mkdir, aux2);
-
-                system(mkdir);
+                mkdir(aux2, 0777);
 
                 //per refrescar la pagina 
                 //El que faig es afegir un element amb el nom Predeterminat a la grid i per-li click "artificialment"
@@ -175,6 +173,7 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
                 userdata->box = grid;
                 on_button_clicked(GTK_WIDGET(auxButton), userdata);
+
             }
             break;
 
@@ -256,17 +255,9 @@ void vaciarCache()
 
     system(comandoRm);
 
-
-    char *comando_inicial2 = "mkdir ";
-    char *comandoMkdir = (char *)malloc(strlen(guardarPrevisualizaciones) + 1 +strlen(comando_inicial2)); // Asignar memoria
-    strcpy(comandoMkdir, comando_inicial2);
-    strcat(comandoMkdir, guardarPrevisualizaciones);
-
-    system(comandoMkdir);
-
+    mkdir(guardarPrevisualizaciones, 0777);
 
     free(comandoRm);
-    free(comandoMkdir);
 }
 
 //encontrar items de un submenu del menu
@@ -328,6 +319,7 @@ void refrescarDirectori(GtkWidget *widget, gpointer data)
     userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
     userdata->box = box;
     on_button_clicked(GTK_WIDGET(auxButton), userdata);
+    g_free(userdata);
 
 }
 
@@ -420,7 +412,6 @@ void volverAInicio(GtkWidget *widget, gpointer data)
     userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
     g_signal_connect(button2, "clicked", G_CALLBACK(on_button_clicked), userdata);
 
-    
     gtk_widget_show_all(box);
     
 }
@@ -594,5 +585,6 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(item3), menu3);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), item3);
 
+    
     gtk_widget_show_all(window);
 }
