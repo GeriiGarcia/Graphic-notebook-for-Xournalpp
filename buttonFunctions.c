@@ -6,7 +6,7 @@ void on_button_clicked(GtkWidget *, gpointer );
 void afegirPredeterminat(GtkWidget *);
 GtkWidget *create_file_button(const char *, gpointer , char *, int);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
-void ponerOpcionesACero();
+void ponerOpcionesACero(void);
 
 void suprimir(GtkWidget *widget, gpointer user_data)
 {
@@ -54,7 +54,7 @@ void exportarAPdf(GtkWidget *widget, gpointer user_data)
 
 void abrirPdf(GtkWidget *widget, gpointer user_data)
 {
-    
+    (void)widget;
     UserData *button_data = (UserData *)user_data;
 
     if(recientesAplicacion->recientesActivado == 0)
@@ -82,6 +82,7 @@ void abrirPdf(GtkWidget *widget, gpointer user_data)
 
 gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)user_data;
 
     if (event->button == 3) 
@@ -114,8 +115,6 @@ gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointe
             
         }
 
-        
-
         gtk_widget_show_all(menu);
 
         // Mostrar el menú
@@ -123,6 +122,8 @@ gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointe
     }
     else
         return FALSE;
+
+    return TRUE;
 }
 
 /***
@@ -140,7 +141,7 @@ gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointe
 void box_add(GtkWidget *parent_box, char *class, const char * auxPrev, gpointer data, char * d_name, int i, int j, int esPdf)
 {  
     // Crear el botón
-
+    (void)parent_box;
     UserData *button_data = (UserData *)data;
 
     GtkWidget *normalButton = create_file_button(auxPrev, data, d_name, esPdf);
@@ -197,7 +198,7 @@ void afegirPredeterminat(GtkWidget *main_box)
     gtk_container_add(GTK_CONTAINER(button), image);
     gtk_container_add(GTK_CONTAINER(box), button);
 
-    gtk_widget_set_size_request(button, ANCHO_PREV + 50 , ALTURA_PREV + 50);
+    gtk_widget_set_size_request(button, (gint)(ANCHO_PREV + 50) , (gint)(ALTURA_PREV + 50));
 
     UserData *data = g_new(UserData, 1);
     data->box = main_box;
@@ -223,6 +224,7 @@ void afegirPredeterminat(GtkWidget *main_box)
 
 
 void on_button_hover(GtkWidget *widget, GdkEvent *event, gpointer data) {
+    (void)event;
     UserData *button_data = (UserData *)data;
     gchar *tooltip = gtk_widget_get_tooltip_text(widget);
 
@@ -232,7 +234,7 @@ void on_button_hover(GtkWidget *widget, GdkEvent *event, gpointer data) {
     }
 }
 
-void on_button_unhover(GtkWidget *widget, gpointer data) {
+void on_button_unhover(GtkWidget *widget) {
     // Limpiar el tooltip cuando el ratón deja el área del widget
     gtk_widget_set_tooltip_text(widget, NULL);
 }
@@ -246,7 +248,7 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name,
 
     // Cargar la imagen de vista previa del PDF en un GtkImage
     GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
-    GdkPixbuf *scaled_pixbuf = gdk_pixbuf_scale_simple( pixbuf, ANCHO_PREV, ALTURA_PREV, GDK_INTERP_BILINEAR);
+    GdkPixbuf *scaled_pixbuf = gdk_pixbuf_scale_simple( pixbuf, (int)ANCHO_PREV, (int)ALTURA_PREV, GDK_INTERP_BILINEAR);
     g_object_unref(pixbuf);  // Liberar el pixbuf original después de escalar
     GtkWidget *image = gtk_image_new_from_pixbuf(scaled_pixbuf);
 
@@ -279,6 +281,7 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name,
 
 void abrirXournal(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)data;
 
     GtkWidget *parent = gtk_widget_get_parent(button_data->box);

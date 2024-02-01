@@ -9,7 +9,7 @@
  * 
 */
 void quitarDesdeUltimaBarra(char *cadena) {
-    int longitud = strlen(cadena);
+    int longitud = (int)strlen(cadena);
 
     // Verificar si la cadena es vacía o tiene un solo carácter (no hay barras que quitar)
     if (longitud <= 1) {
@@ -60,7 +60,7 @@ const char *obtenerExtension(const char *nombreArchivo) {
 
 //para cuando necesito añadir contrabarras
 char* agregarBarras(char *cadena) {
-    int longitud = strlen(cadena);
+    int longitud = (int)strlen(cadena);
 
     // Contar la cantidad de espacios en la cadena
     int contadorEspacios = 0;
@@ -74,7 +74,7 @@ char* agregarBarras(char *cadena) {
     int nuevaLongitud = longitud + contadorEspacios;
 
     // Crear un nuevo arreglo para almacenar la cadena modificada
-    char *nuevaCadena = (char *)malloc((nuevaLongitud + 1) * sizeof(char));
+    char *nuevaCadena = (char *)malloc((size_t)(nuevaLongitud + 1) * sizeof(char));
 
     // Copiar la cadena original con barras adicionales en el nuevo arreglo
     int indiceOriginal = 0;
@@ -102,9 +102,8 @@ void css_add(char *css)
 {
     /* CSS */
     GError *error = NULL;
-    GtkStyleContext *context;
     GtkCssProvider *provider = gtk_css_provider_new ();
-    gtk_css_provider_load_from_data (provider, css, strlen (css), &error);
+    gtk_css_provider_load_from_data (provider, css, (gssize)strlen(css), &error);
     if (error != NULL)
     {
         fprintf (stderr, "CSS: %s\n", error->message);
@@ -117,8 +116,9 @@ void css_add(char *css)
  * @brief Se usa en el qsort()
 */
 int compararArchivos(const void *a, const void *b) {
-    const char *nombreA = *(const char **)a;
-    const char *nombreB = *(const char **)b;
+    const char *nombreA = *(const char * const *)a;
+    const char *nombreB = *(const char * const *)b;
+
 
     // Obtener extensiones
     const char *extensionA = obtenerExtension(nombreA);

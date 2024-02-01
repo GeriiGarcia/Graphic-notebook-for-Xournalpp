@@ -217,6 +217,7 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
 
 void nuevaCarpeta(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)data;
     gchar *texto = "textOption";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
@@ -233,6 +234,7 @@ void nuevaCarpeta(GtkWidget *widget, gpointer data)
 
 void reset(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)data;
     ponerOpcionesACero();
     gchar *texto = "textOption";
@@ -268,7 +270,9 @@ void vaciarCache()
 }
 
 //encontrar items de un submenu del menu
-void encontrarHijos(GtkWidget *widget, gpointer data) {
+void encontrarHijos(struct _GtkWidget *widget, void *data) 
+{
+    (void)data;
     const gchar *nombreWidget = gtk_widget_get_name(widget);
 
     // Verificar si el widget tiene el nombre "vaciarCache"
@@ -282,7 +286,7 @@ void encontrarHijos(GtkWidget *widget, gpointer data) {
     }
 }
 
-void recargarTamaño(GtkWidget *widget, gpointer data)
+void recargarTamaño(GtkWidget *widget)
 {
 
     if (GTK_IS_MENU_ITEM(widget)) {
@@ -302,6 +306,7 @@ void recargarTamaño(GtkWidget *widget, gpointer data)
 
 void refrescarDirectori(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)data;
 
     GtkWidget *box = gtk_widget_get_parent(button_data->box);
@@ -328,6 +333,7 @@ void refrescarDirectori(GtkWidget *widget, gpointer data)
 
 void passTo(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     if(data)
         system("passTo UNI &");
     else
@@ -336,14 +342,13 @@ void passTo(GtkWidget *widget, gpointer data)
 
 void exportarPdf(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)data;
     gchar *texto = "textOption";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
-    texto = "buttonOk";
-    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
 
     gtk_widget_show(textWidget);
-    //gtk_widget_show(buttonOk);
+    
     gtk_entry_set_text(GTK_ENTRY(textWidget), "Pulsa un archivo");
 
     ponerOpcionesACero();
@@ -364,6 +369,7 @@ void ordenarPdf(GtkWidget *widget, gpointer data)
 
 void cambiarRutaPredeterminada(GtkWidget *widget, gpointer data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)data;
     gchar *texto = "textOption";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
@@ -514,27 +520,27 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
 
     GtkWidget *section2_4 = gtk_menu_item_new_with_label("Ordenar");
     GtkWidget *section2_4_0 = gtk_menu_new();
-    GSList *group = NULL;
+    //GSList *group = NULL;
     // Crear las opciones como elementos de menú de radio
     GtkWidget *section2_4_1 = gtk_radio_menu_item_new_with_label(NULL, "Xopp primero");
     GtkWidget *section2_4_2 = gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(section2_4_1), "Pdf primero");
     if(ordenarArchivos == 0)
     {
-        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
+        gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_1), TRUE);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_2), FALSE);
     }
     else if(ordenarArchivos == 1)
     {
-        group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
+        gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(section2_4_1));
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_1), FALSE);
         gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(section2_4_2), TRUE);
     }
          
 
-    GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\t\tF5");
+    GtkWidget *section2_5 = gtk_menu_item_new_with_mnemonic("_Refrescar directorio\t\t\tF5");
 
-    GtkWidget *section2_6 = gtk_menu_item_new_with_mnemonic("_Volver a inicio\t\t\t\tF6");;
+    GtkWidget *section2_6 = gtk_menu_item_new_with_mnemonic("_Volver a inicio\t\t\t\t\tF6");;
 
     g_signal_connect(G_OBJECT(section2_1), "activate", G_CALLBACK(mostrar_pdf), data);
     g_signal_connect(G_OBJECT(section2_2), "activate", G_CALLBACK(mostrar_previsualizaciones), data);

@@ -30,7 +30,7 @@ extern char rutaPredeterminada[10000];
 extern char cwd[10000];  // Definición de cwd
 extern char guardarPrevisualizaciones[1024];  // Definición de guardarPrevisualizaciones
 extern char directorioMas[1024];  // Definición de directorioMas
-extern char *css;
+extern char *CSS;
 
 #define NUEVA_CARPETA 0
 #define NUEVO_XOURNAL 19
@@ -95,7 +95,7 @@ void box_add(GtkWidget *, char *, const char * , gpointer , char * , int , int ,
 void runOk(GtkWidget *, gpointer ); 
 gboolean on_key_press(GtkWidget *, GdkEventKey *, gpointer );
 void refrescarDirectori(GtkWidget *, gpointer );
-void ponerOpcionesACero();
+void ponerOpcionesACero(void);
 char *cambiarExtension(const char *, const char *);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 int directorio_existe(const char *);
@@ -105,4 +105,26 @@ const char* obtener_nombre_archivo(const char* );
 void ordenar(struct Recientes *, const char *, int );
 void borrarRecientes(GtkWidget *, gpointer );
 void volverAInicio(GtkWidget *, gpointer );
+void on_drag_data_received(GtkWidget *, GtkSelectionData *, gpointer );
+void alCierre(void);
+void cargarConfig(void);
+long long calcularTamanoCarpeta(const char *); 
+void nuevaCarpeta(GtkWidget *, gpointer );
+void reset(GtkWidget *, gpointer );
+void vaciarCache(void);
+void encontrarHijos(GtkWidget *, void *);
+void recargarTamaño(GtkWidget * );
+void passTo(GtkWidget *, gpointer );
+void exportarPdf(GtkWidget *, gpointer );
+void ordenarXopp(GtkWidget *, gpointer );
+void ordenarPdf(GtkWidget *, gpointer );
+void cambiarRutaPredeterminada(GtkWidget *, gpointer );
+void mostrar_pdf(GtkWidget *, gpointer );
+void mostrar_previsualizaciones(GtkWidget *, gpointer );
+void suprimir(GtkWidget *, gpointer );
+void exportarAPdf(GtkWidget *, gpointer );
+void abrirPdf(GtkWidget *, gpointer );
+void on_button_hover(GtkWidget *, GdkEvent *, gpointer );
+void on_button_unhover(GtkWidget * );
+
 #endif // INCLUDES_H

@@ -6,7 +6,7 @@ char cwd[10000] = "/home/gerard/Gerard/UNI/Apuntes";
 char guardarPrevisualizaciones[1024] = "/home/gerard/.libretaXournal/cache/";
 char guardarConfig[1024] = "/home/gerard/.libretaXournal/config/config.txt";
 char directorioMas[1024] = "/home/gerard/Gerard/Projects/libreriaGrafica/IMG/plus_icon.png";
-char *css =
+char *CSS =
     ".border          { border-color: #cc7700; border-style: solid; border-width: 10px; padding:5px;}\n"
     ".border_margin   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; }\n"
     ".border_margin_pdf   { margin: 10px; border-radius: 5%; opacity: 0.9; border-style: solid; border-color: #add8e6; }\n";
@@ -55,7 +55,7 @@ void ordenar(struct Recientes *recientes, const char *archivo, int activado) {
 }
 
 
-void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, int x, int y, GtkSelectionData *sel_data, guint info, guint time, gpointer data) {
+void on_drag_data_received(GtkWidget *widget, GtkSelectionData *sel_data, gpointer data) {
     gchar **uris = gtk_selection_data_get_uris(sel_data);
     for (int i = 0; uris[i] != NULL; i++) {
         gchar *path = g_filename_from_uri(uris[i], NULL, NULL);
@@ -157,10 +157,10 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         }
         else
         {   
-            GtkWidget *box = gtk_widget_get_parent(widget);
+            GtkWidget *cont = gtk_widget_get_parent(widget);
 
             GList *childrenArchivo, *iterArchivo;
-            childrenArchivo = gtk_container_get_children(GTK_CONTAINER(box));
+            childrenArchivo = gtk_container_get_children(GTK_CONTAINER(cont));
             
             for(iterArchivo = childrenArchivo; iterArchivo != NULL; iterArchivo = g_list_next(iterArchivo))
             {
@@ -278,7 +278,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 while ((dir = readdir(d)) != NULL) 
                 {
                     //en cas que no es digui "." el directori y que tingui format .pdf o .xopp o que no tingui format (directori) llavors es MOSTRARAN
-                    if(strcmp(dir->d_name,".") && (!strcmp(obtenerExtension(dir->d_name), "Sin extensión") || (!strcmp(obtenerExtension(dir->d_name), ".xopp") || (!strcmp(obtenerExtension(dir->d_name), ".pdf")) && mostrarPdf == 1) )) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
+                    if(strcmp(dir->d_name, ".")&& (!strcmp(obtenerExtension(dir->d_name), "Sin extensión")|| (!strcmp(obtenerExtension(dir->d_name), ".xopp")|| (!strcmp(obtenerExtension(dir->d_name), ".pdf") && mostrarPdf == 1)))) /*&& strcmp(dir->d_name,"..")) */ // he de posar mes excepcions
                     {
                         archivosDirectorios[n] = (char *)malloc(strlen(dir->d_name) + 1); // Asignar memoria
                         archivosDirectorios[n][0] = '\0';
@@ -291,7 +291,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
             }
 
             //ordenar archivosDirectorios[n]   
-            qsort(archivosDirectorios, n, sizeof(char *), compararArchivos);
+            qsort(archivosDirectorios, (size_t)n, sizeof(char *), compararArchivos);
         }
 
         
@@ -307,14 +307,14 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
                 if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".xopp"))
                 {
-                    css_add(css);
+                    css_add(CSS);
                     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border");
                     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border_margin");
                     gtk_widget_set_name(normalButton, "xournal");
                 } 
                 else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf"))
                 {
-                    css_add(css);
+                    css_add(CSS);
                     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border");
                     gtk_style_context_add_class(gtk_widget_get_style_context(normalButton), "border_margin_pdf");
                     gtk_widget_set_name(normalButton, "pdf");
@@ -325,7 +325,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 gtk_widget_set_margin_top(normalButton, MARGIN);
                 gtk_widget_set_margin_bottom(normalButton, MARGIN);
 
-                gtk_widget_set_size_request(normalButton, ANCHO_PREV + 50, ALTURA_PREV + 50);
+                gtk_widget_set_size_request(normalButton, (gint)(ANCHO_PREV + 50), (gint)(ALTURA_PREV + 50));
 
                 gtk_grid_attach(GTK_GRID(button_data->box), normalButton, i, j, 1, 1);
 
@@ -353,7 +353,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 strcat(auxPrev, ".png");
 
                 pdf_to_image(auxPdf, auxPrev);
-                css_add(css);
+                css_add(CSS);
                 box_add(button_data->box, "border_margin_pdf", auxPrev, data, archivosDirectorios[k], i, j, 1);
                 
 
@@ -371,9 +371,9 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 strcat(auxPrev, guardarPrevisualizaciones);
                 strcat(auxPrev, obtener_nombre_archivo(archivosDirectorios[k]));
                 strcat(auxPrev, ".png");
-                base64_to_image(copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
+                base64_to_image((char *)copiar_y_extraer_preview(agregarBarras(auxXopp), "/home/gerard/.libretaXournal/previewXournal.xml" /*guardarPrevisualizaciones*/), auxPrev);
     
-                css_add(css);
+                css_add(CSS);
                 box_add(button_data->box, "border_margin", auxPrev, data, archivosDirectorios[k], i, j, 0);
     
                 system("rm /home/gerard/.libretaXournal/previewXournal.xml");
@@ -390,7 +390,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 i += 1;
         }
 
-        for (int i = 0; i < n; i++) 
+        for ( i = 0; i < n; i++) 
             free(archivosDirectorios[i]);
         
         afegirPredeterminat(button_data->box);    
@@ -402,7 +402,7 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
 }
 
-static void activate (GtkApplication *app, gpointer user_data){
+static void activate (GtkApplication *app){
     
     GtkWidget *window;
     GtkWidget *button1;

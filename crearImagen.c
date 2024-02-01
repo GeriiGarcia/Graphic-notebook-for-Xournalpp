@@ -28,7 +28,7 @@ void pdf_to_image(const char *pdf_filename, const char *image_filename) {
     double width, height;
     poppler_page_get_size(page, &width, &height);
 
-    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (int)width, (int)height);
     cairo_t *cr = cairo_create(surface);
 
     // Llenar la superficie con blanco
@@ -71,8 +71,6 @@ void base64_to_image(const char *base64, const char *image_filename) {
 
 xmlChar* copiar_y_extraer_preview(const char *ruta_origen, const char *ruta_destino) {
     char comando[1024];
-
-    char *preview = "";
 
     // Copiar el fichero al directorio destino y cambiar la extensión a .gz
    
