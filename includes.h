@@ -20,6 +20,17 @@
 #include <glib.h>
 
 
+#include <sys/wait.h>
+#include <fcntl.h>
+
+
+
+
+
+
+
+
+
 
 #define ANCHO_PREV (59.5+80)
 #define ALTURA_PREV (84.1+80)
@@ -70,6 +81,10 @@ struct Recientes{
     int recientesActivado;
 };
 
+typedef struct {
+    GtkWidget *output_label;
+} AppData;
+
 extern Recientes *recientesAplicacion;
 
 
@@ -105,7 +120,7 @@ const char* obtener_nombre_archivo(const char* );
 void ordenar(struct Recientes *, const char *, int );
 void borrarRecientes(GtkWidget *, gpointer );
 void volverAInicio(GtkWidget *, gpointer );
-void on_drag_data_received(GtkWidget *, GtkSelectionData *, gpointer );
+void on_drag_data_received(GtkWidget *, GdkDragContext *, int , int , GtkSelectionData *, guint , guint , gpointer );
 void alCierre(void);
 void cargarConfig(void);
 long long calcularTamanoCarpeta(const char *); 
@@ -126,5 +141,12 @@ void exportarAPdf(GtkWidget *, gpointer );
 void abrirPdf(GtkWidget *, gpointer );
 void on_button_hover(GtkWidget *, GdkEvent *, gpointer );
 void on_button_unhover(GtkWidget * );
+void on_passText_destroy(GtkWidget *, gpointer );
+gboolean ocultar_ventana(gpointer );
+void conectar_a_wifi(const char *);
+void montar_sshfs(GtkWidget *, gpointer );
+void copiarArchivo(const char *, const char *);
+void copiarDirectorio(const char *, const char *, gpointer );
+void desmontar_sshfs(GtkWidget *, gpointer );
 
 #endif // INCLUDES_H

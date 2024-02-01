@@ -68,7 +68,6 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         userdata->box = box;
         runOk(botoOk, userdata);
         g_free(userdata);
-        return TRUE;
     }
     else if(event->keyval == GDK_KEY_Escape)
     {
@@ -334,13 +333,184 @@ void refrescarDirectori(GtkWidget *widget, gpointer data)
 
 }
 
+
+void on_passText_destroy(GtkWidget *widget, gpointer data) {
+    guint temporizador_id = GPOINTER_TO_UINT(data);
+    // Desconecta la señal "destroy" y elimina el temporizador
+    g_signal_handler_disconnect(widget, temporizador_id);
+}
+
+gboolean ocultar_ventana(gpointer data) {
+    GtkWidget *ventana = GTK_WIDGET(data);
+    guint temporizador_id = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(ventana), "temporizador_id"));
+
+    // Verifica si el temporizador aún existe y si el identificador es mayor que cero
+    if (temporizador_id > 0 && g_source_remove(temporizador_id)) {
+        gtk_widget_hide(ventana);
+    }
+
+    return FALSE;
+}
+
+void conectar_a_wifi(const char *nombre_conexion) {
+    // Construir el comando nmcli
+    gchar *comando = g_strdup_printf("nmcli connection up uuid \"%s\"", nombre_conexion);
+    // Ejecutar el comando
+    int resultado = system(comando);
+    // Liberar la memoria
+    g_free(comando);
+    // Verificar el resultado
+    if (resultado == 0) {
+        printf("Conectado a la red WiFi: %s\n", nombre_conexion);
+    } else {
+        fprintf(stderr, "Error al conectar a la red WiFi: %s\n", nombre_conexion);
+    }
+}
+
+
+void montar_sshfs(GtkWidget *widget, gpointer data) {
+    
+    UserData *app_data = (UserData *)data;
+
+    if(!strcmp(gtk_menu_item_get_label(GTK_MENU_ITEM(widget)), "passTo UNI"))
+    {
+        conectar_a_wifi("0e689f4e-376f-4f1f-bde9-4b48c775afbd");
+    }
+
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("Error al crear el proceso hijo");
+    } else if (pid == 0) {  // Proceso hijo
+        // Ejecuta el comando sshfs en el proceso hijo
+        execlp("sshfs", "sshfs", "-p", "32556", "gerard@gerardgarcia2003.hopto.me:/sftp/gerard/Casa/Gerard/UNI/3er/3.2/Apuntes", "/home/gerard/Gerard/pass", (char *)NULL);
+
+        // Si execlp() falla, muestra un mensaje de error
+        perror("Error al ejecutar el comando sshfs");
+        exit(EXIT_FAILURE);
+    } else {  // Proceso padre
+        // Espera a que el proceso hijo termine
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            gtk_label_set_text(GTK_LABEL(app_data->box), "Montado");
+        } else {
+            gtk_label_set_text(GTK_LABEL(app_data->box), "Error al montar SSHFS");
+        }
+    }
+}
+
+void copiarArchivo(const char *origen, const char *destino) {
+    FILE *file_origen = fopen(origen, "rb");
+    FILE *file_destino = fopen(destino, "wb");
+
+    if (file_origen == NULL || file_destino == NULL) {
+        perror("Error al abrir archivos");
+        exit(EXIT_FAILURE);
+    }
+
+    char buffer[BUFSIZ];
+    size_t bytes_leidos;
+
+    while ((bytes_leidos = fread(buffer, 1, sizeof(buffer), file_origen)) > 0) {
+        fwrite(buffer, 1, bytes_leidos, file_destino);
+    }
+
+    fclose(file_origen);
+    fclose(file_destino);
+}
+
+// Función para copiar directorio recursivamente
+void copiarDirectorio(const char *origen, const char *destino, gpointer data) {
+    
+    DIR *dir_origen = opendir(origen);
+
+    if (dir_origen == NULL) {
+        perror("Error al abrir el directorio de origen");
+        exit(EXIT_FAILURE);
+    }
+
+    // Crea el directorio de destino si no existe
+    mkdir(destino, 0700);
+
+    struct dirent *entrada;
+    while ((entrada = readdir(dir_origen)) != NULL) {
+        if (strcmp(entrada->d_name, ".") == 0 || strcmp(entrada->d_name, "..") == 0) {
+            continue;  // Ignora las entradas . y ..
+        }
+
+        char ruta_origen[2048];
+        char ruta_destino[2048];
+
+        snprintf(ruta_origen, sizeof(ruta_origen), "%s/%s", origen, entrada->d_name);
+        snprintf(ruta_destino, sizeof(ruta_destino), "%s/%s", destino, entrada->d_name);
+
+        struct stat st;
+        if (stat(ruta_origen, &st) == 0 && S_ISDIR(st.st_mode)) {
+            // Si es un directorio, copia recursivamente
+            copiarDirectorio(ruta_origen, ruta_destino, data);
+        } else {
+            // Si es un archivo, simplemente cópialo
+            copiarArchivo(ruta_origen, ruta_destino);
+        }
+    }
+
+    closedir(dir_origen);
+}
+
+void desmontar_sshfs(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    UserData *app_data = (UserData *)data;
+
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        perror("Error al crear el proceso hijo");
+    } else if (pid == 0) {  // Proceso hijo
+        // Ejecuta el comando fusermount en el proceso hijo
+        execlp("fusermount", "fusermount", "-u", "/home/gerard/Gerard/pass", (char *)NULL);
+
+        // Si execlp() falla, muestra un mensaje de error
+        perror("Error al ejecutar el comando fusermount");
+        exit(EXIT_FAILURE);
+    } else {  // Proceso padre
+        // Espera a que el proceso hijo termine
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            gtk_label_set_text(GTK_LABEL(app_data->box), "¡Hecho!");
+        } else {
+            gtk_label_set_text(GTK_LABEL(app_data->box), "Error al desmontar SSHFS");
+        }
+    }
+}
+
 void passTo(GtkWidget *widget, gpointer data)
 {
-    (void)widget;
-    if(data)
-        system("passTo UNI &");
-    else
-        system("passTo &");
+    UserData *button_data = (UserData *)data;
+    gchar *texto = "passText";
+    GtkWidget * passText = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+
+    gtk_widget_show(passText);
+
+    UserData *pass = g_new(UserData, 1);
+    pass->box = passText;
+
+    montar_sshfs(widget,pass);
+    
+    const char *origen = "/home/gerard/Gerard/UNI/Apuntes";
+    const char *destino = "/home/gerard/Gerard/pass/Apuntes";
+    copiarDirectorio(origen, destino, pass);
+    desmontar_sshfs(widget,pass);
+
+    guint temporizador_id = g_timeout_add(15000, ocultar_ventana, passText);
+    g_object_set_data(G_OBJECT(passText), "temporizador_id", GUINT_TO_POINTER(temporizador_id));
+    g_signal_connect(passText, "destroy", G_CALLBACK(on_passText_destroy), GUINT_TO_POINTER(temporizador_id));
+    g_free(button_data);
+
+
 }
 
 void exportarPdf(GtkWidget *widget, gpointer data)
@@ -571,10 +741,10 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     g_signal_connect(G_OBJECT(item3), "activate", G_CALLBACK(recargarTamaño), "Item 3");
 
     section3_1 = gtk_menu_item_new_with_label("passTo");
-    g_signal_connect(G_OBJECT(section3_1), "activate", G_CALLBACK(passTo), NULL);
+    g_signal_connect(G_OBJECT(section3_1), "activate", G_CALLBACK(passTo), data);
 
     section3_2 = gtk_menu_item_new_with_label("passTo UNI");
-    g_signal_connect(G_OBJECT(section3_2), "activate", G_CALLBACK(passTo), "UNI");
+    g_signal_connect(G_OBJECT(section3_2), "activate", G_CALLBACK(passTo), data);
 
     const char *rutaCarpeta = "/home/gerard/.libretaXournal";
     long long tamanoEnBytes = calcularTamanoCarpeta(rutaCarpeta);

@@ -55,11 +55,17 @@ void ordenar(struct Recientes *recientes, const char *archivo, int activado) {
 }
 
 
-void on_drag_data_received(GtkWidget *widget, GtkSelectionData *sel_data, gpointer data) {
+void on_drag_data_received(GtkWidget *widget, GdkDragContext *context, int x, int y, GtkSelectionData *sel_data, guint info, guint time, gpointer data) 
+{
+    (void) context;
+    (void) x;
+    (void) y;
+    (void) time;
+    (void) info;
+
     gchar **uris = gtk_selection_data_get_uris(sel_data);
     for (int i = 0; uris[i] != NULL; i++) {
         gchar *path = g_filename_from_uri(uris[i], NULL, NULL);
-        g_print("Nombre del archivo: %s\n", path);
         char aux[2048] = "";
 
         strcat(aux, agregarBarras(path));
@@ -432,6 +438,10 @@ static void activate (GtkApplication *app){
     GtkWidget *ok = gtk_button_new_with_label("OK");
     gtk_widget_set_name(ok, "buttonOk");
 
+    GtkWidget *passText = gtk_label_new("Empezando...");
+    gtk_widget_set_name(passText, "passText");
+    gtk_widget_set_size_request(passText, 200, 20);
+
     UserData *runData = g_new(UserData, 1);
     runData->box = containerPath;
     g_signal_connect(ok, "clicked", G_CALLBACK(runOk), runData);
@@ -502,6 +512,7 @@ static void activate (GtkApplication *app){
 
     gtk_fixed_put(GTK_FIXED(containerPath), text, 1050,2);
     gtk_fixed_put(GTK_FIXED(containerPath), ok, 1050+175, 2);
+    gtk_fixed_put(GTK_FIXED(containerPath), passText, 800,5);
     
     gtk_container_add(GTK_CONTAINER(main), containerPath);
     //gtk_box_pack_start(GTK_BOX(main), view, TRUE, TRUE, 5);
@@ -516,9 +527,10 @@ static void activate (GtkApplication *app){
     
     gtk_widget_hide(text);
     gtk_widget_hide(ok);
+    gtk_widget_hide(passText);
 
     gtk_main();
-    g_free(userdata);
+    //g_free(userdata);
 }
 
 void alCierre()
