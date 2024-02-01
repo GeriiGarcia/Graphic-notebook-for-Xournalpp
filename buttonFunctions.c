@@ -293,6 +293,8 @@ void abrirXournal(GtkWidget *widget, gpointer data)
     texto = "buttonOk";
     GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(parent), texto);
 
+    gtk_widget_grab_focus(textWidget);
+
     gtk_widget_show(textWidget);
     gtk_widget_show(buttonOk);
     gtk_entry_set_text(GTK_ENTRY(textWidget), "'Nombre de Archivo'");
