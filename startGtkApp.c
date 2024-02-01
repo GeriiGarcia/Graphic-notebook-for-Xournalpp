@@ -346,7 +346,9 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 userdataNew->box = button_data->box;
 
                 g_signal_connect(normalButton, "clicked", G_CALLBACK(on_button_clicked), userdataNew);
-                g_signal_connect(normalButton, "button-press-event", G_CALLBACK(on_button_right_click), userdataNew);
+
+                if(strcmp(archivosDirectorios[k], ".."))
+                    g_signal_connect(normalButton, "button-press-event", G_CALLBACK(on_button_right_click), userdataNew);
             }
             else if(!strcmp(obtenerExtension(archivosDirectorios[k]), ".pdf")) // si es pdf
             {
