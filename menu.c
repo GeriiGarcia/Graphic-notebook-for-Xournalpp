@@ -164,9 +164,9 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 strcat(aux, cwd);
                 strcat(aux, "/");
                 strcat(aux, widget_value);
-                char *aux2 = agregarBarras(aux); 
+                //char *aux2 = agregarBarras(aux); 
 
-                mkdir(aux2, 0777);
+                mkdir(aux, 0777);
 
                 //per refrescar la pagina 
                 //El que faig es afegir un element amb el nom Predeterminat a la grid i per-li click "artificialment"
