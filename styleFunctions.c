@@ -62,16 +62,16 @@ const char *obtenerExtension(const char *nombreArchivo) {
 char* agregarBarras(char *cadena) {
     int longitud = (int)strlen(cadena);
 
-    // Contar la cantidad de espacios en la cadena
-    int contadorEspacios = 0;
+    // Contar la cantidad de paréntesis y espacios en la cadena
+    int contadorParentesisEspacios = 0;
     for (int i = 0; i < longitud; i++) {
-        if (cadena[i] == ' ') {
-            contadorEspacios++;
+        if (cadena[i] == '(' || cadena[i] == ')' || cadena[i] == ' ') {
+            contadorParentesisEspacios++;
         }
     }
 
     // Calcular la nueva longitud de la cadena con barras adicionales
-    int nuevaLongitud = longitud + contadorEspacios;
+    int nuevaLongitud = longitud + contadorParentesisEspacios;
 
     // Crear un nuevo arreglo para almacenar la cadena modificada
     char *nuevaCadena = (char *)malloc((size_t)(nuevaLongitud + 1) * sizeof(char));
@@ -81,7 +81,7 @@ char* agregarBarras(char *cadena) {
     int indiceNuevo = 0;
 
     while (indiceOriginal < longitud) {
-        if (cadena[indiceOriginal] == ' ') {
+        if (cadena[indiceOriginal] == '(' || cadena[indiceOriginal] == ')' || cadena[indiceOriginal] == ' ') {
             nuevaCadena[indiceNuevo++] = '\\'; // Agregar barra invertida
         }
 
@@ -90,9 +90,6 @@ char* agregarBarras(char *cadena) {
 
     // Agregar el carácter nulo al final de la nueva cadena
     nuevaCadena[indiceNuevo] = '\0';
-
-    //print de la cadena nueva
-    //printf("%s\n",nuevaCadena);
 
     return nuevaCadena;
 }
