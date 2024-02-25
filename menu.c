@@ -79,7 +79,17 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         userdata->box = box;
         reset(widget, userdata);
     }
-
+    else if((event->keyval == 78)) 
+    {
+        GtkWidget *box = gtk_widget_get_parent(button_data->box);
+        box = gtk_widget_get_parent(box);
+        box = gtk_widget_get_parent(box);
+        UserData *userdata = g_new(UserData, 1);
+        userdata->box = box;
+        nuevaCarpeta(widget, userdata);
+        return TRUE;
+    }
+//HarryStyles
     return FALSE; // Permite que otros manejadores de eventos procesen la tecla
 }
 
@@ -491,27 +501,39 @@ void desmontar_sshfs(GtkWidget *widget, gpointer data) {
 
 void passTo(GtkWidget *widget, gpointer data)
 {
+     int status;
+    
+    if(!strcmp(gtk_menu_item_get_label(GTK_MENU_ITEM(widget)), "passTo UNI"))
+        status = system("passTo UNI &");
+    
+    else
+        status = system("passTo &");
+    
+    
     UserData *button_data = (UserData *)data;
     gchar *texto = "passText";
     GtkWidget * passText = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
 
     gtk_widget_show(passText);
 
-    UserData *pass = g_new(UserData, 1);
-    pass->box = passText;
+    // UserData *pass = g_new(UserData, 1);
+    // pass->box = passText;
 
-    montar_sshfs(widget,pass);
-    
-    const char *origen = "/home/gerard/Gerard/UNI/Apuntes";
-    const char *destino = "/home/gerard/Gerard/pass/Apuntes";
-    copiarDirectorio(origen, destino, pass);
-    desmontar_sshfs(widget,pass);
+    // montar_sshfs(widget,pass);
+    // const char *origen = "/home/gerard/Gerard/UNI/Apuntes";
+    // const char *destino = "/home/gerard/Gerard/pass/Apuntes";
+    // copiarDirectorio(origen, destino, pass);
+    // desmontar_sshfs(widget,pass);
+
+    if(status == -1)
+        gtk_label_set_text(GTK_LABEL(passText), "¡Error!");
+    else
+        gtk_label_set_text(GTK_LABEL(passText), "¡Hecho!");
 
     guint temporizador_id = g_timeout_add(15000, ocultar_ventana, passText);
     g_object_set_data(G_OBJECT(passText), "temporizador_id", GUINT_TO_POINTER(temporizador_id));
     g_signal_connect(passText, "destroy", G_CALLBACK(on_passText_destroy), GUINT_TO_POINTER(temporizador_id));
     g_free(button_data);
-
 
 }
 
@@ -650,7 +672,7 @@ void create_menu(GtkWidget *main_box, GtkWidget *window) {
     menu1 = gtk_menu_new();
     item1 = gtk_menu_item_new_with_label("Archivo");
 
-    section1_1 = gtk_menu_item_new_with_label("Nueva Carpeta");
+    section1_1 = gtk_menu_item_new_with_label("Nueva Carpeta\tMayús+Ctrl+N");
     UserData *data = g_new(UserData, 1);
     strncpy(data->some_value, cwd, sizeof(data->some_value) - 1); 
     data->box = main_box;

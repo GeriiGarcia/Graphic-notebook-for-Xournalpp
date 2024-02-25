@@ -465,6 +465,8 @@ static void activate (GtkApplication *app){
     gtk_window_set_default_size(GTK_WINDOW(window), 1600, 900);
     gtk_window_maximize(GTK_WINDOW(window));
 
+    gtk_window_set_icon_from_file(GTK_WINDOW(window), "/home/gerard/Gerard/Projects/libreriaGrafica/icon.xpm", NULL);
+
     //creamos y metemos en window el contenedor main
     main = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   
     files = gtk_grid_new();  
