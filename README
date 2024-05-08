@@ -1,1 +1,13 @@
-Readme
+# Graphic Notebook for Xournal++
+
+## Introduction
+
+This application has been developed in C with GTK3+ graphic library. It shows .xopp and .pdf files in a table of 4 columns and any number of rows. 
+
+I started to develop this application because I do my unisersity notes with Xournal++. What I found missing was an application that unifys all my notes like Ipad applications, like goodnotes or OneNote of Microsoft. I did not like to open my file manager to go search my notes.
+
+## Description
+
+![Texto alternativo](img/preview.png)
+
+This application is a file management interface that displays folders and files in a grid layout. Each button, when clicked, enters into a folder or opens a file in Xournal++. PDF files are indicated with a blue frame and can be opened directly. The xopp files would be indicated with an orange frame (not visible in this image). The interface is designed to be scrollable both horizontally and vertically, ensuring that users can navigate through the content even if it extends beyond the screen size. This allows for efficient organization and access to various file types within the application.
