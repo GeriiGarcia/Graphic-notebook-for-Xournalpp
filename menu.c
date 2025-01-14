@@ -56,7 +56,7 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
         volverAInicio(widget, user_data);
         return TRUE;
     }
-    else if(event->keyval == GDK_KEY_Return){
+    else if(event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter){
         GtkWidget *box = gtk_widget_get_parent(button_data->box);
         box = gtk_widget_get_parent(box);
         box = gtk_widget_get_parent(box);
@@ -150,6 +150,9 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
     gchar *texto = "textOption";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
     
+    texto = "passText";
+    GtkWidget *passText = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+    const gchar *label_text = gtk_label_get_text(GTK_LABEL(passText));
 
     const gchar *widget_value = gtk_entry_get_text(GTK_ENTRY(textWidget));
 
@@ -177,22 +180,6 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 //char *aux2 = agregarBarras(aux); 
 
                 mkdir(aux, 0777);
-
-                //per refrescar la pagina 
-                //El que faig es afegir un element amb el nom Predeterminat a la grid i per-li click "artificialment"
-                GtkWidget *main = gtk_widget_get_parent(textWidget);
-                main = gtk_widget_get_parent(main);
-
-                texto = "files";
-                GtkWidget *grid = get_widget_by_name(GTK_CONTAINER(main), texto);
-                GtkWidget *auxButton = gtk_button_new_with_label("Predeterminado");
-                gtk_grid_attach(GTK_GRID(grid), auxButton, 0, 0, 50, 50);
-
-                UserData *userdata = g_new(UserData, 1);
-                strncpy(userdata->some_value, "button1", sizeof(userdata->some_value) - 1);
-                userdata->some_value[sizeof(userdata->some_value) - 1] = '\0';
-                userdata->box = grid;
-                on_button_clicked(GTK_WIDGET(auxButton), userdata);
 
             }
             break;
@@ -222,9 +209,29 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
             
             borrarRecientes(botonOk, data);
             break;
+        case CONFIRMAR_SUPRIMIR:            
+            if(strcmp(widget_value, "") == 0)
+            {
+                char *prefix = "Confirmar eliminación ";
+                char *nombre = label_text + strlen(prefix);
+
+                char aux[1024] = "";
+                strcat(aux, agregarBarras(cwd));
+                strcat(aux, "/");
+                strcat(aux, agregarBarras(nombre));
+                char comando[1024] = "rm -rf ";
+                strcat(comando, aux);
+
+                system(comando);
+
+                gtk_widget_hide(passText);
+            }
+            break;
         default:
             break;
         }
+
+        refrescarDirectori(botonOk, data);
 
         gtk_entry_set_text(GTK_ENTRY(textWidget), "");
         gtk_widget_hide(textWidget);
@@ -262,9 +269,12 @@ void reset(GtkWidget *widget, gpointer data)
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
     texto = "buttonOk";
     GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
+    texto = "passText";
+    GtkWidget * passText = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
 
     gtk_widget_hide(textWidget);
     gtk_widget_hide(buttonOk);
+    gtk_widget_hide(passText);
 }
 
 void vaciarCache()
@@ -541,12 +551,12 @@ void exportarPdf(GtkWidget *widget, gpointer data)
 {
     (void)widget;
     UserData *button_data = (UserData *)data;
-    gchar *texto = "textOption";
+    gchar *texto = "passText";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
 
     gtk_widget_show(textWidget);
     
-    gtk_entry_set_text(GTK_ENTRY(textWidget), "Pulsa un archivo");
+    gtk_label_set_text(GTK_LABEL(textWidget), "Pulsa un archivo");
 
     ponerOpcionesACero();
     opcionesMenu[EXPORTAR_PDF] = 1;

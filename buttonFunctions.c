@@ -10,18 +10,30 @@ void ponerOpcionesACero(void);
 
 void suprimir(GtkWidget *widget, gpointer user_data)
 {
+    (void)widget;
     UserData *button_data = (UserData *)user_data;
 
-    char aux[1024] = "";
-    strcat(aux, agregarBarras(cwd));
-    strcat(aux, "/");
-    strcat(aux, agregarBarras(button_data->some_value));
-    char comando[1024] = "rm -rf ";
-    strcat(comando, aux);
+    GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+    parent = gtk_widget_get_parent(parent);
+    parent = gtk_widget_get_parent(parent);
 
-    system(comando);
+    gchar *texto = "buttonOk";
+    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(parent), texto);
 
-    refrescarDirectori(widget, user_data);
+    texto = "passText";
+    GtkWidget * passText = get_widget_by_name(GTK_CONTAINER(parent), texto);
+
+    //gtk_widget_grab_focus(textWidget);
+
+    gtk_widget_show(passText);
+    gtk_widget_show(buttonOk);
+    gchar *label_text = g_strdup_printf("Confirmar eliminación %s", button_data->some_value);
+    gtk_label_set_text(GTK_LABEL(passText), label_text);
+    g_free(label_text);
+    
+
+    ponerOpcionesACero();
+    opcionesMenu[CONFIRMAR_SUPRIMIR] = 1;
 }
 
 void exportarAPdf(GtkWidget *widget, gpointer user_data)

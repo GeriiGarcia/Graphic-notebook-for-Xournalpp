@@ -48,6 +48,7 @@ extern char *CSS;
 #define VACIAR_CACHE 1
 #define EXPORTAR_PDF 18
 #define CAMBIAR_RUTA_PREDETERMINADA 2
+#define CONFIRMAR_SUPRIMIR 3
 /***
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
