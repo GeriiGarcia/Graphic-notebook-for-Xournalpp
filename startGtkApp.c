@@ -418,7 +418,7 @@ void abrir_directorio_actual(GtkWidget *widget, gpointer data) {
     (void)widget;
     (void)data;
     char comando[1024] = "nautilus ";
-    strcat(comando, cwd);
+    strcat(comando, agregarBarras(cwd));
     strcat(comando, " &");
     system(comando);
 }
