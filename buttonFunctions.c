@@ -36,6 +36,37 @@ void suprimir(GtkWidget *widget, gpointer user_data)
     opcionesMenu[CONFIRMAR_SUPRIMIR] = 1;
 }
 
+void moverArchivo(GtkWidget *widget, gpointer user_data)
+{
+    (void)widget;
+    UserData *button_data = (UserData *)user_data;
+
+    GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+    parent = gtk_widget_get_parent(parent);
+    parent = gtk_widget_get_parent(parent);
+
+    gchar *texto = "buttonOk";
+    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(parent), texto);
+
+    texto = "passText";
+    GtkWidget * passText = get_widget_by_name(GTK_CONTAINER(parent), texto);
+
+    gtk_widget_show(passText);
+    gtk_widget_show(buttonOk);
+
+    char aux[2048] = "";
+    strcat(aux, agregarBarras(cwd));
+    strcat(aux, "/");
+    strcat(aux, agregarBarras(button_data->some_value));
+    gchar *label_text = g_strdup_printf("Mover archivo %s", aux);
+    gtk_label_set_text(GTK_LABEL(passText), label_text);
+    g_free(label_text);
+    
+
+    ponerOpcionesACero();
+    opcionesMenu[MOVER_ARCHIVO] = 1;
+}
+
 void exportarAPdf(GtkWidget *widget, gpointer user_data)
 {
     UserData *button_data = (UserData *)user_data;
@@ -124,7 +155,15 @@ gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointe
         else if(!strcmp(obtenerExtension(button_data->some_value), "Sin extensión"))
         {
             
-            
+
+        }
+
+        // Mostrar en el menu la opcion de mover archivo   
+        if(!strcmp(obtenerExtension(button_data->some_value), ".xopp") || !strcmp(obtenerExtension(button_data->some_value), ".pdf"))
+        {
+            GtkWidget *opcion3 = gtk_menu_item_new_with_label("Mover archivo");
+            g_signal_connect(opcion3, "activate", G_CALLBACK(moverArchivo), user_data);
+            gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion3);
         }
 
         gtk_widget_show_all(menu);
