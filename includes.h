@@ -149,5 +149,8 @@ void montar_sshfs(GtkWidget *, gpointer );
 void copiarArchivo(const char *, const char *);
 void copiarDirectorio(const char *, const char *, gpointer );
 void desmontar_sshfs(GtkWidget *, gpointer );
+void abrir_directorio_actual(GtkWidget *, gpointer );
+GtkWidget* crear_menu_contextual(void);
+gboolean on_window_button_press(GtkWidget *widget, GdkEventButton *, gpointer );
 
 #endif // INCLUDES_H

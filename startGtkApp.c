@@ -414,6 +414,35 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
 
 }
 
+void abrir_directorio_actual(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    (void)data;
+    char comando[1024] = "nautilus ";
+    strcat(comando, cwd);
+    strcat(comando, " &");
+    system(comando);
+}
+
+GtkWidget* crear_menu_contextual() {
+    GtkWidget *menu = gtk_menu_new();
+    GtkWidget *abrir_directorio_item = gtk_menu_item_new_with_label("Abrir directorio actual");
+    g_signal_connect(abrir_directorio_item, "activate", G_CALLBACK(abrir_directorio_actual), NULL);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), abrir_directorio_item);
+    gtk_widget_show_all(menu);
+    return menu;
+}
+
+gboolean on_window_button_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data) {
+    (void)widget;
+    (void)user_data;
+    if (event->type == GDK_BUTTON_PRESS && event->button == 3) { // Botón derecho del ratón
+        GtkWidget *menu = crear_menu_contextual();
+        gtk_menu_popup_at_pointer(GTK_MENU(menu), (GdkEvent*)event);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void activate (GtkApplication *app){
     
     GtkWidget *window;
@@ -472,6 +501,10 @@ static void activate (GtkApplication *app){
     files = gtk_grid_new();  
     gtk_widget_set_name(files, "files");  
     gtk_widget_set_name(main, "main");  
+
+    // Conectar el evento de clic derecho en la ventana
+    g_signal_connect(G_OBJECT(window), "button-press-event", G_CALLBACK(on_window_button_press), NULL);
+
 
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
