@@ -227,6 +227,25 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
                 gtk_widget_hide(passText);
             }
             break;
+        case MOVER_ARCHIVO:
+            if(strcmp(widget_value, "") == 0)
+            {
+                char *prefix = "Mover archivo ";
+                char *nombre = label_text + strlen(prefix);
+
+                char aux[2048] = "";
+                strcat(aux, nombre);
+
+                char mv[2056] = "mv ";
+                strcat(mv, aux);
+                strcat(mv, " ");
+                strcat(mv, agregarBarras(cwd));
+                
+                system(mv);
+
+                gtk_widget_hide(passText);
+            }
+            break;
         default:
             break;
         }

@@ -49,11 +49,14 @@ extern char *CSS;
 #define EXPORTAR_PDF 18
 #define CAMBIAR_RUTA_PREDETERMINADA 2
 #define CONFIRMAR_SUPRIMIR 3
+#define MOVER_ARCHIVO 4
 /***
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
  * @param opciones[1] Vaciar Caché
  * @param opciones[2] cambiar ruta predeterminada
+ * @param opciones[3] confirmar suprimir
+ * @param opciones[4] mover archivo
 */
 extern int opcionesMenu[20];
 
@@ -138,6 +141,7 @@ void cambiarRutaPredeterminada(GtkWidget *, gpointer );
 void mostrar_pdf(GtkWidget *, gpointer );
 void mostrar_previsualizaciones(GtkWidget *, gpointer );
 void suprimir(GtkWidget *, gpointer );
+void moverArchivo(GtkWidget *, gpointer );
 void exportarAPdf(GtkWidget *, gpointer );
 void abrirPdf(GtkWidget *, gpointer );
 void on_button_hover(GtkWidget *, GdkEvent *, gpointer );
