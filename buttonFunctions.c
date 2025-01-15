@@ -8,6 +8,7 @@ GtkWidget *create_file_button(const char *, gpointer , char *, int);
 GtkWidget *get_widget_by_name(GtkContainer *, const gchar *);
 void ponerOpcionesACero(void);
 
+
 void suprimir(GtkWidget *widget, gpointer user_data)
 {
     (void)widget;
@@ -66,6 +67,36 @@ void moverArchivo(GtkWidget *widget, gpointer user_data)
     ponerOpcionesACero();
     opcionesMenu[MOVER_ARCHIVO] = 1;
 }
+
+void cambiarNombre(GtkWidget *widget, gpointer user_data)
+{
+    (void)widget;
+    UserData *button_data = (UserData *)user_data;
+
+    GtkWidget *parent = gtk_widget_get_parent(button_data->box);
+    parent = gtk_widget_get_parent(parent);
+    parent = gtk_widget_get_parent(parent);
+
+    gchar *texto = "textOption";
+    GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(parent), texto);
+    texto = "buttonOk";
+    GtkWidget * buttonOk = get_widget_by_name(GTK_CONTAINER(parent), texto);
+
+    gtk_widget_grab_focus(textWidget);
+
+    gtk_widget_show(textWidget);
+    gtk_widget_show(buttonOk);
+
+    gchar *label_text = g_strdup_printf("%s", button_data->some_value);
+    gtk_entry_set_text(GTK_ENTRY(textWidget), label_text);    
+
+    nombreDeFicheroAntiguo = (char *)label_text;
+
+    ponerOpcionesACero();
+    opcionesMenu[CAMBIAR_NOMBRE] = 1;
+}
+
+
 
 void exportarAPdf(GtkWidget *widget, gpointer user_data)
 {
@@ -158,12 +189,18 @@ gboolean on_button_right_click(GtkWidget *widget, GdkEventButton *event, gpointe
 
         }
 
-        // Mostrar en el menu la opcion de mover archivo   
+        // Mostrar en el menu las opciones de movher archivo y cambiar de nombre   
         if(!strcmp(obtenerExtension(button_data->some_value), ".xopp") || !strcmp(obtenerExtension(button_data->some_value), ".pdf"))
         {
             GtkWidget *opcion3 = gtk_menu_item_new_with_label("Mover archivo");
             g_signal_connect(opcion3, "activate", G_CALLBACK(moverArchivo), user_data);
             gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion3);
+
+            GtkWidget *opcion4 = gtk_menu_item_new_with_label("Cambiar nombre");
+            g_signal_connect(opcion4, "activate", G_CALLBACK(cambiarNombre), user_data);
+            gtk_menu_shell_append(GTK_MENU_SHELL(menu), opcion4);
+
+
         }
 
         gtk_widget_show_all(menu);

@@ -42,6 +42,7 @@ extern char cwd[10000];  // Definición de cwd
 extern char guardarPrevisualizaciones[1024];  // Definición de guardarPrevisualizaciones
 extern char directorioMas[1024];  // Definición de directorioMas
 extern char *CSS;
+extern char *nombreDeFicheroAntiguo; // Para el cambio de nombre de un archivo
 
 #define NUEVA_CARPETA 0
 #define NUEVO_XOURNAL 19
@@ -50,6 +51,7 @@ extern char *CSS;
 #define CAMBIAR_RUTA_PREDETERMINADA 2
 #define CONFIRMAR_SUPRIMIR 3
 #define MOVER_ARCHIVO 4
+#define CAMBIAR_NOMBRE 5
 /***
  * @param opciones[0] Nueva carpeta
  * @param opciones[19] Nuevo Xournal
@@ -142,6 +144,7 @@ void mostrar_pdf(GtkWidget *, gpointer );
 void mostrar_previsualizaciones(GtkWidget *, gpointer );
 void suprimir(GtkWidget *, gpointer );
 void moverArchivo(GtkWidget *, gpointer );
+void cambiarNombre(GtkWidget *, gpointer );
 void exportarAPdf(GtkWidget *, gpointer );
 void abrirPdf(GtkWidget *, gpointer );
 void on_button_hover(GtkWidget *, GdkEvent *, gpointer );

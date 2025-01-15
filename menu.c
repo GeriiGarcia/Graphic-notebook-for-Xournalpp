@@ -1,6 +1,8 @@
 #include "includes.h"
 #include <math.h>
 
+char *nombreDeFicheroAntiguo;
+
 void ponerOpcionesACero()
 {
     for (int i = 0; i < 20; i++)
@@ -149,12 +151,12 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
 
     gchar *texto = "textOption";
     GtkWidget * textWidget = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
-    
+    const gchar *widget_value = gtk_entry_get_text(GTK_ENTRY(textWidget));
+
     texto = "passText";
     GtkWidget *passText = get_widget_by_name(GTK_CONTAINER(button_data->box), texto);
     const gchar *label_text = gtk_label_get_text(GTK_LABEL(passText));
 
-    const gchar *widget_value = gtk_entry_get_text(GTK_ENTRY(textWidget));
 
     for (int i = 0; i < 20; i++)
     {
@@ -169,85 +171,108 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
     {
         switch (opcion)
         {
-        case NUEVA_CARPETA:
-            
-            if(strcmp(widget_value, ""))
-            {
-                char aux[2048]="";
-                strcat(aux, cwd);
-                strcat(aux, "/");
-                strcat(aux, widget_value);
-                //char *aux2 = agregarBarras(aux); 
+            case NUEVA_CARPETA:
 
-                mkdir(aux, 0777);
+                if(strcmp(widget_value, ""))
+                {
+                    char aux[2048]="";
+                    strcat(aux, cwd);
+                    strcat(aux, "/");
+                    strcat(aux, widget_value);
+                    //char *aux2 = agregarBarras(aux); 
 
-            }
-            break;
+                    mkdir(aux, 0777);
 
-        case NUEVO_XOURNAL:
+                }
+                break;
 
-            if(strcmp(widget_value, ""))
-            {
-                char aux[2048]="";
-                strcat(aux, cwd);
-                strcat(aux, "/");
-                strcat(aux, widget_value);
-                char *aux2 = agregarBarras(aux); 
+            case NUEVO_XOURNAL:
 
-                char xournalpp[2056] = "xournalpp ";
-                strcat(xournalpp, aux2);
-                strcat(xournalpp, " &");
+                if(strcmp(widget_value, "") == 0)
+                {
+                    char aux[2048]="";
+                    strcat(aux, cwd);
+                    strcat(aux, "/");
+                    strcat(aux, widget_value);
+                    char *aux2 = agregarBarras(aux); 
 
-                system(xournalpp);
-            }
-            break;
+                    char xournalpp[2056] = "xournalpp ";
+                    strcat(xournalpp, aux2);
+                    strcat(xournalpp, " &");
 
-        case CAMBIAR_RUTA_PREDETERMINADA:
+                    system(xournalpp);
+                }
+                break;
 
-            if(directorio_existe(widget_value) == 1)
-                strcpy(rutaPredeterminada, widget_value);
-            
-            borrarRecientes(botonOk, data);
-            break;
-        case CONFIRMAR_SUPRIMIR:            
-            if(strcmp(widget_value, "") == 0)
-            {
-                char *prefix = "Confirmar eliminación ";
-                char *nombre = label_text + strlen(prefix);
+            case CAMBIAR_RUTA_PREDETERMINADA:
 
-                char aux[1024] = "";
-                strcat(aux, agregarBarras(cwd));
-                strcat(aux, "/");
-                strcat(aux, agregarBarras(nombre));
-                char comando[1024] = "rm -rf ";
-                strcat(comando, aux);
+                if(directorio_existe(widget_value) == 1)
+                    strcpy(rutaPredeterminada, widget_value);
 
-                system(comando);
+                borrarRecientes(botonOk, data);
+                break;
+            case CONFIRMAR_SUPRIMIR:            
+                if(strcmp(widget_value, "") == 0)
+                {
+                    char *prefix = "Confirmar eliminación ";
+                    char *nombre = label_text + strlen(prefix);
 
-                gtk_widget_hide(passText);
-            }
-            break;
-        case MOVER_ARCHIVO:
-            if(strcmp(widget_value, "") == 0)
-            {
-                char *prefix = "Mover archivo ";
-                char *nombre = label_text + strlen(prefix);
+                    char aux[1024] = "";
+                    strcat(aux, agregarBarras(cwd));
+                    strcat(aux, "/");
+                    strcat(aux, agregarBarras(nombre));
+                    char comando[1024] = "rm -rf ";
+                    strcat(comando, aux);
 
-                char aux[2048] = "";
-                strcat(aux, nombre);
+                    system(comando);
 
-                char mv[2056] = "mv ";
-                strcat(mv, aux);
-                strcat(mv, " ");
-                strcat(mv, agregarBarras(cwd));
+                    gtk_widget_hide(passText);
+                }
+                break;
+            case MOVER_ARCHIVO:
+                if(strcmp(widget_value, "") == 0)
+                {
+                    char *prefix = "Mover archivo ";
+                    char *nombre = label_text + strlen(prefix);
+
+                    char aux[2048] = "";
+                    strcat(aux, nombre);
+
+                    char mv[2056] = "mv ";
+                    strcat(mv, aux);
+                    strcat(mv, " ");
+                    strcat(mv, agregarBarras(cwd));
+
+                    system(mv);
+
+                    gtk_widget_hide(passText);
+                }
+                break;
+            case CAMBIAR_NOMBRE: //TODO coger nombre de archivo del textOption
                 
-                system(mv);
+                if(strcmp(widget_value, ""))
+                {
+                    char aux[2048]="";
+                    strcat(aux, cwd);
+                    strcat(aux, "/");
+                    strcat(aux, widget_value);
 
-                gtk_widget_hide(passText);
-            }
-            break;
-        default:
-            break;
+                    char aux2[2048]="";
+                    strcat(aux2, cwd);
+                    strcat(aux2, "/");
+                    strcat(aux2, nombreDeFicheroAntiguo);
+                    strcat(aux2, " ");
+
+                    char mv[2056] = "mv ";
+                    strcat(mv, aux2);
+                    strcat(mv, aux);
+
+
+                    system(mv);                
+                }
+                break;
+            default:
+                break;
         }
 
         refrescarDirectori(botonOk, data);
@@ -256,6 +281,9 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
         gtk_widget_hide(textWidget);
         gtk_widget_hide(botonOk);
         ponerOpcionesACero();
+    }
+    else{
+        printf("Q cojones\n");
     }
     
 }
