@@ -328,6 +328,42 @@ void on_button_unhover(GtkWidget *widget) {
 }
 
 
+
+void on_drag_data_get(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *data, guint info, guint time, gpointer user_data) {
+    (void)widget;
+    (void)context;
+    (void)info;
+    (void)time;
+    
+    UserData *button_data = (UserData *)user_data;
+
+    // Construir la ruta completa del archivo
+    char file_path[2048] = "";
+    strcat(file_path, cwd);
+    strcat(file_path, "/");
+    strcat(file_path, agregarBarras(button_data->some_value));
+
+    // Convierte la ruta al formato URI
+    gchar *uri = g_filename_to_uri(file_path, NULL, NULL);
+    if (uri) {
+        gchar *uris[] = { uri, NULL };
+        gtk_selection_data_set_uris(data, uris);
+        g_free(uri);
+    }
+}
+
+
+void setup_drag_source(GtkWidget *widget, UserData *userdata) {
+    // Establece los formatos MIME aceptados
+    GtkTargetEntry targets[] = {
+        { "text/uri-list", 0, 0 }
+    };
+
+    gtk_drag_source_set(widget, GDK_BUTTON1_MASK, targets, G_N_ELEMENTS(targets), GDK_ACTION_COPY);
+    g_signal_connect(widget, "drag-data-get", G_CALLBACK(on_drag_data_get), userdata);
+}
+
+
 GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name, int esPdf) {
     UserData *button_data = (UserData *)data;
 
@@ -362,6 +398,7 @@ GtkWidget *create_file_button(const char *filename, gpointer data, char *d_name,
     g_signal_connect(button, "enter-notify-event", G_CALLBACK(on_button_hover), userdataNew);
     g_signal_connect(button, "leave-notify-event", G_CALLBACK(on_button_unhover), userdataNew);
     g_signal_connect(button, "button-press-event", G_CALLBACK(on_button_right_click), userdataNew);
+    setup_drag_source(button, userdataNew);
 
     return box;
 }

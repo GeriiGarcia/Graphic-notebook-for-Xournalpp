@@ -159,5 +159,7 @@ void desmontar_sshfs(GtkWidget *, gpointer );
 void abrir_directorio_actual(GtkWidget *, gpointer );
 GtkWidget* crear_menu_contextual(void);
 gboolean on_window_button_press(GtkWidget *widget, GdkEventButton *, gpointer );
+void on_drag_data_get(GtkWidget *, GdkDragContext *, GtkSelectionData *, guint , guint , gpointer );
+void setup_drag_source(GtkWidget *, UserData *);
 
 #endif // INCLUDES_H
