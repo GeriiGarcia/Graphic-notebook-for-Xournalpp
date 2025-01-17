@@ -51,6 +51,13 @@ gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
     
     if (event->keyval == GDK_KEY_F5) {
         refrescarDirectori(widget, user_data);
+        
+        GtkWidget *menuXournal = gtk_widget_get_parent(button_data->box);
+        menuXournal = gtk_widget_get_parent(menuXournal);
+        menuXournal = gtk_widget_get_parent(menuXournal);
+        menuXournal = get_widget_by_name(GTK_CONTAINER(menuXournal), "menuXournal");
+        actualizarMenuXournal(menuXournal, user_data);
+
         return TRUE; // Indica que se ha manejado el evento
     }
     else if(event->keyval == GDK_KEY_F6)
@@ -188,7 +195,7 @@ void runOk(GtkWidget *botonOk, gpointer data) // por algun motivo que desconozco
 
             case NUEVO_XOURNAL:
 
-                if(strcmp(widget_value, "") == 0)
+                if(strcmp(widget_value, "") != 0)
                 {
                     char aux[2048]="";
                     strcat(aux, cwd);

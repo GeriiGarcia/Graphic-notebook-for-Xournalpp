@@ -91,13 +91,26 @@ typedef struct {
     GtkWidget *output_label;
 } AppData;
 
-extern Recientes *recientesAplicacion;
-
+typedef struct {
+    char filename[1024];
+    int pid;
+} XournalProcess;
 
 typedef struct {
     char some_value[1024];
     GtkWidget *box;
 } UserData;
+
+typedef struct {
+    int pid;
+    char *filename;
+    UserData *user_data;
+} XournalProcessData;
+
+extern Recientes *recientesAplicacion;
+
+
+
 
 
 void create_menu(GtkWidget *, GtkWidget *);
@@ -161,5 +174,9 @@ GtkWidget* crear_menu_contextual(void);
 gboolean on_window_button_press(GtkWidget *widget, GdkEventButton *, gpointer );
 void on_drag_data_get(GtkWidget *, GdkDragContext *, GtkSelectionData *, guint , guint , gpointer );
 void setup_drag_source(GtkWidget *, UserData *);
+XournalProcess* obtenerProcesosXournal(int *);
+void actualizarMenuXournal(GtkWidget *, UserData *);
+void cerrarProcesoXournal(GtkWidget *, gpointer );
+void abrirArchivoXournal(GtkWidget *, gpointer );
 
 #endif // INCLUDES_H

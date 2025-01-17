@@ -188,6 +188,17 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         strcat(comando, button_data->some_value);
         strcat(xournal, agregarBarras(comando));
         system(strcat(xournal, " &")); //para que se vaya al background
+
+        system("xdotool key F5");
+
+        //XournalProcessData *xournal_data = g_new(XournalProcessData, 1);
+        //xournal_data->user_data = button_data;
+        //GtkWidget *menuXournal = gtk_widget_get_parent(button_data->box);
+        //menuXournal = gtk_widget_get_parent(menuXournal);
+        //menuXournal = gtk_widget_get_parent(menuXournal);
+        //menuXournal = gtk_widget_get_parent(menuXournal);
+        //menuXournal = get_widget_by_name(GTK_CONTAINER(menuXournal), "menuXournal");
+        //actualizarMenuXournal(menuXournal, xournal_data);
     }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
     {
@@ -443,6 +454,200 @@ gboolean on_window_button_press(GtkWidget *widget, GdkEventButton *event, gpoint
     return FALSE;
 }
 
+XournalProcess* obtenerProcesosXournal(int *numProcesos) {
+    FILE *fp;
+    char path[1035];
+    XournalProcess *procesos = NULL;
+    *numProcesos = 0;
+
+    // Ejecutar el comando ps aux | grep xournal
+    fp = popen("ps aux | grep xournalpp | grep -v grep", "r");
+    if (fp == NULL) {
+        perror("Error al ejecutar el comando");
+        return NULL;
+    }
+
+    // Leer la salida del comando
+    while (fgets(path, sizeof(path), fp) != NULL) {
+        // Procesar la línea para obtener el PID y el nombre del archivo
+        char *token = strtok(path, " ");
+        int pid = 0;
+        char filename[1024] = "";
+
+        for (int i = 0; token != NULL; i++) {
+            if (i == 1) {
+                pid = atoi(token);
+            } else if (i >= 10) {
+                strcat(filename, token);
+                strcat(filename, " ");
+            }
+            token = strtok(NULL, " ");
+        }
+
+        // Eliminar el salto de línea del final del nombre del archivo
+        filename[strcspn(filename, "\n")] = 0;
+
+        // Extraer la parte relevante de la ruta del archivo
+        char *relative_path = strstr(filename, rutaPredeterminada);
+        if (relative_path) {
+            relative_path += strlen(rutaPredeterminada);
+            if (relative_path[0] == '/') {
+                relative_path++; // Omitir el primer '/'
+            }
+        } else {
+            relative_path = filename; // Si no se encuentra rutaPredeterminada, usar la ruta completa
+        }
+
+        // Añadir el proceso a la lista
+        procesos = realloc(procesos, sizeof(XournalProcess) * ((size_t)(*numProcesos) + 1));
+        strcpy(procesos[*numProcesos].filename, relative_path);
+        procesos[*numProcesos].pid = pid;
+        (*numProcesos)++;
+    }
+
+    pclose(fp);
+    return procesos;
+}
+
+void abrirArchivoXournal(GtkWidget *widget, gpointer data) {
+    (void)widget;
+    XournalProcessData *process_data = (XournalProcessData *)data;
+    const char *filename = process_data->filename;
+
+    // Ejecutar el comando wmctrl -lp
+    FILE *fp;
+    char path[1035];
+    char command[] = "wmctrl -lp";
+    fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("Error al ejecutar el comando");
+        return;
+    }
+
+    // Leer la salida del comando
+    while (fgets(path, sizeof(path), fp) != NULL) {
+        // Buscar la línea que contiene el nombre del fichero
+        if (strstr(path, obtener_nombre_archivo(filename)) != NULL) {
+            // Extraer el ID de la ventana
+            char window_id[20];
+            sscanf(path, "%s", window_id);
+
+            // Construir el comando para abrir la ventana
+            char wmctrl_command[256] = "wmctrl -ia ";
+            strcat(wmctrl_command, window_id);
+
+            GtkWidget *hbox = gtk_widget_get_parent(widget);
+            // Eliminar el widget del contenedor
+            gtk_widget_destroy(hbox);
+
+            system("xdotool key F5");
+
+            // Ejecutar el comando para abrir la ventana
+            system(wmctrl_command);
+
+            
+
+            break;
+        }
+    }
+
+    pclose(fp);
+
+    // Actualizar el menú Xournal
+    GtkWidget *menuXournal = gtk_widget_get_parent(widget);
+    while (menuXournal && !GTK_IS_BOX(menuXournal)) {
+        menuXournal = gtk_widget_get_parent(menuXournal);
+    }
+    if (menuXournal) {
+        UserData *user_data = (UserData *)g_object_get_data(G_OBJECT(menuXournal), "user_data");
+        actualizarMenuXournal(menuXournal, user_data);
+    }
+
+    //
+
+    // Liberar process_data
+    if (process_data != NULL) {
+        g_free(process_data->filename);
+        g_free(process_data);
+    }
+}
+
+void cerrarProcesoXournal(GtkWidget *widget, gpointer data) {
+    (void)widget;
+
+    XournalProcessData *process_data = (XournalProcessData *)data;
+    int pid = process_data->pid;
+
+    char comando[256];
+    snprintf(comando, sizeof(comando), "kill %d", pid);
+    system(comando);
+
+    // Obtener el contenedor principal desde el widget
+    GtkWidget *hbox = gtk_widget_get_parent(widget);
+
+    // Eliminar el widget del contenedor
+    gtk_widget_destroy(hbox);
+
+    // Liberar process_data
+    if (process_data != NULL) {
+        g_free(process_data->filename);
+        g_free(process_data);
+    }
+}
+
+void actualizarMenuXournal(GtkWidget *container, UserData *data) {
+    // Limpiar el contenedor
+    GList *children = gtk_container_get_children(GTK_CONTAINER(container));
+    for (GList *iter = children; iter != NULL; iter = g_list_next(iter)) {
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    }
+    g_list_free(children);
+
+    // Obtener los procesos de Xournal
+    int numProcesos = 0;
+    XournalProcess *procesos = obtenerProcesosXournal(&numProcesos);
+
+    // Mantener una lista de nombres de archivos ya añadidos
+    GList *nombres_añadidos = NULL;
+
+    // Crear los widgets para cada proceso
+    for (int i = 0; i < numProcesos; i++) {
+        const char *nombre_archivo = obtener_nombre_archivo(procesos[i].filename);
+
+        // Comprobar si el nombre del archivo ya ha sido añadido
+        if (g_list_find_custom(nombres_añadidos, nombre_archivo, (GCompareFunc)g_strcmp0) == NULL) {
+            // Añadir el nombre del archivo a la lista
+            nombres_añadidos = g_list_prepend(nombres_añadidos, g_strdup(nombre_archivo));
+
+            GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+            GtkWidget *button = gtk_button_new_with_label(procesos[i].filename);
+            GtkWidget *close_button = gtk_button_new_with_label("X");
+
+            // Crear la estructura para pasar los datos
+            XournalProcessData *process_data = g_new(XournalProcessData, 1);
+            process_data->pid = procesos[i].pid;
+            process_data->user_data = data;
+            process_data->filename = g_strdup(nombre_archivo);
+
+            // Conectar la señal para cerrar el proceso
+            g_signal_connect(close_button, "clicked", G_CALLBACK(cerrarProcesoXournal), process_data);
+
+            // Conectar la señal para abrir el archivo
+            g_signal_connect(button, "clicked", G_CALLBACK(abrirArchivoXournal), process_data);
+
+            gtk_box_pack_start(GTK_BOX(hbox), button, TRUE, TRUE, 0);
+            gtk_box_pack_start(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
+            gtk_container_add(GTK_CONTAINER(container), hbox);
+        }
+    }
+
+    gtk_widget_show_all(container);
+
+    // Liberar la lista de nombres añadidos
+    g_list_free_full(nombres_añadidos, g_free);
+    free(procesos);
+}
+
 static void activate (GtkApplication *app){
     
     GtkWidget *window;
@@ -504,6 +709,13 @@ static void activate (GtkApplication *app){
 
     // Conectar el evento de clic derecho en la ventana
     g_signal_connect(G_OBJECT(window), "button-press-event", G_CALLBACK(on_window_button_press), NULL);
+
+
+    GtkWidget *menuXournal = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    gtk_widget_set_name(menuXournal, "menuXournal");
+    gtk_box_pack_start(GTK_BOX(main), menuXournal, FALSE, FALSE, 0);
+    g_object_set_data(G_OBJECT(menuXournal), "user_data", runData);
+    actualizarMenuXournal(menuXournal, runData);
 
 
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
