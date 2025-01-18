@@ -189,16 +189,11 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
         strcat(xournal, agregarBarras(comando));
         system(strcat(xournal, " &")); //para que se vaya al background
 
-        system("xdotool key F5");
-
-        //XournalProcessData *xournal_data = g_new(XournalProcessData, 1);
-        //xournal_data->user_data = button_data;
-        //GtkWidget *menuXournal = gtk_widget_get_parent(button_data->box);
-        //menuXournal = gtk_widget_get_parent(menuXournal);
-        //menuXournal = gtk_widget_get_parent(menuXournal);
-        //menuXournal = gtk_widget_get_parent(menuXournal);
-        //menuXournal = get_widget_by_name(GTK_CONTAINER(menuXournal), "menuXournal");
-        //actualizarMenuXournal(menuXournal, xournal_data);
+        if(recientesAplicacion->recientesActivado == 0)
+        {
+            system("xdotool key F5");
+        }
+            
     }
     else if(!strcmp(obtenerExtension(gtk_button_get_label(GTK_BUTTON(widget))), "Sin extensión")) // en cas que no tingui extensio (directori) he de llistar
     {
@@ -274,6 +269,18 @@ void on_button_clicked(GtkWidget *widget, gpointer data) {
                 archivosDirectorios[i][0] = '\0';
                 strcat(archivosDirectorios[i], recientesAplicacion->recientes[i]);
             }
+
+            // añadir un boton que haga volverAInicio(widget, user_data);
+            GtkWidget *volverInicio = gtk_button_new_with_label("Volver a inicio");
+            gtk_widget_set_name(volverInicio, "volverAInicio");
+            gtk_grid_attach(GTK_GRID(button_data->box), volverInicio, 0, 0, 1, 1);
+            gtk_widget_set_margin_top(volverInicio, MARGIN);
+            gtk_widget_set_margin_bottom(volverInicio, MARGIN);
+
+            // Conectar el botón "Volver a inicio" a la función volverAInicio
+            g_signal_connect(volverInicio, "clicked", G_CALLBACK(volverAInicio), button_data);
+            
+
 
             n = recientesAplicacion->numRecientes;
         }
